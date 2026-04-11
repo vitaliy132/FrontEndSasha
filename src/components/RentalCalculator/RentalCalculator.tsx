@@ -1,10 +1,6 @@
 import type { FormEvent } from 'react'
 import { useState } from 'react'
-import { getApiBase, submitLead } from '../../lib/api'
-import {
-  calculateRentalQuote,
-  RentalQuoteError,
-} from '../../lib/rentalQuote'
+import { getApiBase, submitLead, calculateRental } from '../../lib/api'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import { BookingLeadForm } from './BookingLeadForm'
@@ -48,7 +44,7 @@ export function RentalCalculator() {
 
     setCalculating(true)
     try {
-      const data = calculateRentalQuote({
+      const data = await calculateRental({
         startDate: formData.startDate,
         endDate: formData.endDate,
         vehicleType: formData.vehicleType,
@@ -66,12 +62,7 @@ export function RentalCalculator() {
       setResult(data)
     } catch (err) {
       setResult(null)
-      const message =
-        err instanceof RentalQuoteError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : 'Something went wrong. Try again.'
+      const message = err instanceof Error ? err.message : 'Something went wrong. Try again.'
       setCalcError(message)
     } finally {
       setCalculating(false)

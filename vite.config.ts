@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
+      '/calculate-rental': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
       '/submit-lead': {
         target: 'http://localhost:3000',
         changeOrigin: true,
