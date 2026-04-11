@@ -1,88 +1,44 @@
 import type { FormEvent } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { getApiBase, submitLead } from '../../lib/api'
 import {
   calculateRentalQuote,
-  defaultVehicleModel,
-  listVehicleModels,
   RentalQuoteError,
 } from '../../lib/rentalQuote'
-import { readRentalQueryParams } from '../../lib/urlParams'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
+import { formatModelLabel, useLeadForm, useRentalForm } from './index'
 import { Spinner } from './Spinner'
 
-function useInitialFromUrl() {
-  return useMemo(() => readRentalQueryParams(window.location.search), [])
-}
 
 export function RentalCalculator() {
-  const initial = useInitialFromUrl()
-  const userId = initial.userId
+  const { formData, modelOptions, updateField, updateVehicleType, userId } = useRentalForm()
+  const { formData: leadFormData, updateField: updateLeadField } = useLeadForm()
 
-  const [startDate, setStartDate] = useState(initial.startDate)
-  const [endDate, setEndDate] = useState(initial.endDate)
-  const [vehicleType, setVehicleType] = useState<VehicleType>(
-    initial.vehicleType,
-  )
-  const [vehicleModel, setVehicleModel] = useState(initial.vehicleModel)
-  const [cancellationWaiver, setCancellationWaiver] = useState(
-    initial.cancellationWaiver,
-  )
-  const [windshieldCoverage, setWindshieldCoverage] = useState(
-    initial.windshieldCoverage,
-  )
-  const [generatorDailyUnlimited, setGeneratorDailyUnlimited] = useState(
-    initial.generatorDailyUnlimited,
-  )
-  const [kmPackages, setKmPackages] = useState(String(initial.kmPackages))
-  const [extraKm, setExtraKm] = useState(String(initial.extraKm))
-  const [generatorHours, setGeneratorHours] = useState(
-    String(initial.generatorHours),
-  )
+  const apiBase = getApiBase()
 
   const [calculating, setCalculating] = useState(false)
   const [calcError, setCalcError] = useState<string | null>(null)
   const [result, setResult] = useState<RentalCalculateResponse | null>(null)
 
   const [showBooking, setShowBooking] = useState(false)
-  const [leadName, setLeadName] = useState('')
-  const [leadEmail, setLeadEmail] = useState('')
-  const [leadPhone, setLeadPhone] = useState('')
   const [leadLoading, setLeadLoading] = useState(false)
   const [leadError, setLeadError] = useState<string | null>(null)
   const [leadSuccess, setLeadSuccess] = useState(false)
-
-  const apiBase = getApiBase()
-
-  const modelOptions = useMemo(
-    () => listVehicleModels(vehicleType),
-    [vehicleType],
-  )
-
-  useEffect(() => {
-    if (!modelOptions.includes(vehicleModel)) {
-      setVehicleModel(defaultVehicleModel(vehicleType))
-    }
-  }, [vehicleType, vehicleModel, modelOptions])
-
-  function formatModelLabel(id: string) {
-    return id.replaceAll('_', ' ')
-  }
 
   async function handleCalculate(e: FormEvent) {
     e.preventDefault()
     setCalcError(null)
 
-    const kmPackagesNum = Number(kmPackages)
-    const extraKmNum = Number(extraKm)
-    const generatorHoursNum = Number(generatorHours)
+    const kmPackagesNum = Number(formData.kmPackages)
+    const extraKmNum = Number(formData.extraKm)
+    const generatorHoursNum = Number(formData.generatorHours)
 
     const validationError = validateRentalForm({
-      startDate,
-      endDate,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
       kmPackages: kmPackagesNum,
       extraKm: extraKmNum,
       generatorHours: generatorHoursNum,
@@ -95,13 +51,13 @@ export function RentalCalculator() {
     setCalculating(true)
     try {
       const data = calculateRentalQuote({
-        startDate,
-        endDate,
-        vehicleType,
-        vehicleModel,
-        cancellationWaiver,
-        windshieldCoverage,
-        generatorDailyUnlimited,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        vehicleType: formData.vehicleType,
+        vehicleModel: formData.vehicleModel,
+        cancellationWaiver: formData.cancellationWaiver,
+        windshieldCoverage: formData.windshieldCoverage,
+        generatorDailyUnlimited: formData.generatorDailyUnlimited,
         kmPackages: kmPackagesNum,
         extraKm: extraKmNum,
         generatorHours: generatorHoursNum,
@@ -121,16 +77,6 @@ export function RentalCalculator() {
     }
   }
 
-  function handleLeadField(
-    field: 'name' | 'email' | 'phone',
-    value: string,
-  ): void {
-    setLeadError(null)
-    if (field === 'name') setLeadName(value)
-    if (field === 'email') setLeadEmail(value)
-    if (field === 'phone') setLeadPhone(value)
-  }
-
   async function handleLeadSubmit(e: FormEvent) {
     e.preventDefault()
     setLeadError(null)
@@ -142,9 +88,9 @@ export function RentalCalculator() {
     }
 
     const err = validateLeadForm({
-      name: leadName,
-      email: leadEmail,
-      phone: leadPhone,
+      name: leadFormData.name,
+      email: leadFormData.email,
+      phone: leadFormData.phone,
       userId,
     })
     if (err) {
@@ -156,9 +102,9 @@ export function RentalCalculator() {
     try {
       await submitLead({
         userId: userId?.trim() ?? '',
-        name: leadName.trim(),
-        email: leadEmail.trim(),
-        phone: leadPhone.trim(),
+        name: leadFormData.name.trim(),
+        email: leadFormData.email.trim(),
+        phone: leadFormData.phone.trim(),
         quote,
       })
       setLeadSuccess(true)
@@ -221,8 +167,8 @@ export function RentalCalculator() {
                     <input
                       id="start-date"
                       type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      value={formData.startDate}
+                      onChange={(e) => updateField('startDate', e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                       disabled={calculating}
                     />
@@ -237,8 +183,8 @@ export function RentalCalculator() {
                     <input
                       id="end-date"
                       type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                      value={formData.endDate}
+                      onChange={(e) => updateField('endDate', e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                       disabled={calculating}
                     />
@@ -254,11 +200,10 @@ export function RentalCalculator() {
                   </label>
                   <select
                     id="vehicle-type"
-                    value={vehicleType}
+                    value={formData.vehicleType}
                     onChange={(e) => {
                       const vt = e.target.value as VehicleType
-                      setVehicleType(vt)
-                      setVehicleModel(defaultVehicleModel(vt))
+                      updateVehicleType(vt)
                     }}
                     className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                     disabled={calculating}
@@ -279,12 +224,12 @@ export function RentalCalculator() {
                   </label>
                   <select
                     id="vehicle-model"
-                    value={vehicleModel}
-                    onChange={(e) => setVehicleModel(e.target.value)}
+                    value={formData.vehicleModel}
+                    onChange={(e) => updateField('vehicleModel', e.target.value)}
                     className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                     disabled={calculating}
                   >
-                    {modelOptions.map((id) => (
+                    {modelOptions.map((id: string) => (
                       <option key={id} value={id}>
                         {formatModelLabel(id)}
                       </option>
@@ -295,8 +240,8 @@ export function RentalCalculator() {
                 <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
                   <input
                     type="checkbox"
-                    checked={cancellationWaiver}
-                    onChange={(e) => setCancellationWaiver(e.target.checked)}
+                    checked={formData.cancellationWaiver}
+                    onChange={(e) => updateField('cancellationWaiver', e.target.checked)}
                     className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     disabled={calculating}
                   />
@@ -308,8 +253,8 @@ export function RentalCalculator() {
                 <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
                   <input
                     type="checkbox"
-                    checked={windshieldCoverage}
-                    onChange={(e) => setWindshieldCoverage(e.target.checked)}
+                    checked={formData.windshieldCoverage}
+                    onChange={(e) => updateField('windshieldCoverage', e.target.checked)}
                     className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     disabled={calculating}
                   />
@@ -321,9 +266,9 @@ export function RentalCalculator() {
                 <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
                   <input
                     type="checkbox"
-                    checked={generatorDailyUnlimited}
+                    checked={formData.generatorDailyUnlimited}
                     onChange={(e) =>
-                      setGeneratorDailyUnlimited(e.target.checked)
+                      updateField('generatorDailyUnlimited', e.target.checked)
                     }
                     className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     disabled={calculating}
@@ -347,8 +292,8 @@ export function RentalCalculator() {
                       inputMode="numeric"
                       min={0}
                       step={1}
-                      value={kmPackages}
-                      onChange={(e) => setKmPackages(e.target.value)}
+                      value={formData.kmPackages}
+                      onChange={(e) => updateField('kmPackages', e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                       disabled={calculating}
                     />
@@ -366,8 +311,8 @@ export function RentalCalculator() {
                       inputMode="numeric"
                       min={0}
                       step={1}
-                      value={extraKm}
-                      onChange={(e) => setExtraKm(e.target.value)}
+                      value={formData.extraKm}
+                      onChange={(e) => updateField('extraKm', e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                       disabled={calculating}
                     />
@@ -385,10 +330,10 @@ export function RentalCalculator() {
                       inputMode="decimal"
                       min={0}
                       step="0.5"
-                      value={generatorHours}
-                      onChange={(e) => setGeneratorHours(e.target.value)}
+                      value={formData.generatorHours}
+                      onChange={(e) => updateField('generatorHours', e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                      disabled={calculating || generatorDailyUnlimited}
+                      disabled={calculating || formData.generatorDailyUnlimited}
                     />
                   </div>
                 </div>
@@ -489,10 +434,10 @@ export function RentalCalculator() {
 
               {showBooking && result ? (
                 <BookingLeadForm
-                  name={leadName}
-                  email={leadEmail}
-                  phone={leadPhone}
-                  onChange={handleLeadField}
+                  name={leadFormData.name}
+                  email={leadFormData.email}
+                  phone={leadFormData.phone}
+                  onChange={updateLeadField}
                   onSubmit={handleLeadSubmit}
                   loading={leadLoading}
                   error={leadError}
