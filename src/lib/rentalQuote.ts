@@ -17,15 +17,9 @@ const TAX_RATE = 0.13
 const MIN_CHARGE_DAYS_FOR_DAILY_RATE = 5
 const CDW_DAILY_RATE = 30
 const CDW_MINIMUM = 210
-const KM_PACKAGE_PRICES: Record<number, number> = {
-  1000: 350,
-  2000: 700,
-  3000: 1050,
-  4000: 1400,
-  5000: 1750,
-}
-const PER_KM_RATE = 0.41
+const KM_PACKAGE_RATE = 350
 const TRAILER_HITCH_FEE = 150
+const EXTRA_KM_RATE = 0.41
 
 const { SEASONS: SEASON_DEFINITIONS, PRICING, ADD_ONS, defaults } = pricingConfig as {
   SEASONS: {
@@ -121,19 +115,14 @@ const calendarRentalDays = (startDate: Date, endDate: Date) =>
 const billedDaysForDailyRates = (calendarDays: number) =>
   Math.max(calendarDays, MIN_CHARGE_DAYS_FOR_DAILY_RATE)
 
-function calculateDailyRates(
+function calculateDailyRateTotal(
   startDate: Date,
   daysToSum: number,
   vehicleType: VehicleType,
   vehicleModel: string,
-): {
-  dailyRates: { date: string; season: SeasonName; price: number }[]
-  total: number
-} {
+) {
   const row = resolvePricingRow(vehicleType, vehicleModel)
-  const dailyRates: { date: string; season: SeasonName; price: number }[] = []
   let total = 0
-
   for (let dayOffset = 0; dayOffset < daysToSum; dayOffset += 1) {
     const day = addDays(startDate, dayOffset)
     const season = getSeason(day)
@@ -141,19 +130,9 @@ function calculateDailyRates(
     if (price == null || !Number.isFinite(Number(price))) {
       throw new RentalQuoteError(`Missing rate for season ${season} on model ${vehicleModel}`)
     }
-    const dailyPrice = Number(price)
-    dailyRates.push({
-      date: format(day, 'yyyy-MM-dd'),
-      season,
-      price: roundToTwo(dailyPrice),
-    })
-    total += dailyPrice
+    total += Number(price)
   }
-
-  return {
-    dailyRates,
-    total: roundToTwo(total),
-  }
+  return roundToTwo(total)
 }
 
 const getPrepFee = (vehicleType: VehicleType) =>
@@ -244,9 +223,6 @@ export function sanitizePayload(
     typeof raw?.vehicleModel === 'string' ? raw.vehicleModel.trim() : ''
   const vehicleModel = rawModel || defaultModel
 
-  // Handle KM package - default to no package
-  const kmPackage = raw?.kmPackage || { type: 'package' as const, value: 0 }
-
   return {
     startDate: raw?.startDate,
     endDate: raw?.endDate,
@@ -255,7 +231,8 @@ export function sanitizePayload(
     cancellationWaiver: Boolean(raw?.cancellationWaiver),
     windshieldCoverage: Boolean(raw?.windshieldCoverage),
     generatorDailyUnlimited: Boolean(raw?.generatorDailyUnlimited),
-    kmPackage,
+    kmPackages: toNonNegativeInteger(raw?.kmPackages, 0),
+    extraKm: toNonNegativeInteger(raw?.extraKm, 0),
     generatorHours: toNonNegativeNumber(raw?.generatorHours, 0),
     kitchenKit: Boolean(raw?.kitchenKit),
     beddingKitPeople: toNonNegativeInteger(raw?.beddingKitPeople, 0),
@@ -264,19 +241,19 @@ export function sanitizePayload(
 }
 
 const buildLineItems = (b: RentalQuoteBreakdown) => [
-  { name: 'Base Daily Rental', value: b.basePrice },
-  { name: 'CDW Plus', value: b.cdw },
+  { name: 'Daily Rental', value: b.dailyRateTotal },
+  { name: 'CDW', value: b.cdw },
   { name: 'Prep Fee', value: b.prepFee },
-  { name: 'KM Package', value: b.kmPrice },
+  { name: 'KM Packages', value: b.kmPackages },
   { name: 'Hitch', value: b.hitch },
+  { name: 'Extra KM', value: b.extraKm },
   { name: 'Generator', value: b.generator },
   { name: 'Cancellation Waiver', value: b.cancellationWaiver },
   { name: 'Windshield Coverage', value: b.windshield },
   { name: 'Kitchen Kit', value: b.kitchenKit },
   { name: 'Bedding Kit', value: b.beddingKit },
   { name: 'Bike Rack', value: b.bikeRack },
-  { name: 'Subtotal', value: b.subtotal },
-  { name: 'Tax (13%)', value: b.tax },
+  { name: 'Tax', value: b.tax },
 ]
 
 const buildSummaryMessage = ({
@@ -342,47 +319,25 @@ export function calculateRentalQuote(
 
   resolvePricingRow(sanitized.vehicleType, sanitized.vehicleModel)
 
-  // Calculate calendar and billed days
   const days = calendarRentalDays(startDate, endDate)
   const daysForDailyRateSum = billedDaysForDailyRates(days)
-
-  // Calculate daily rates with season breakdown
-  const { dailyRates, total: basePrice } = calculateDailyRates(
+  const dailyRateTotal = calculateDailyRateTotal(
     startDate,
     daysForDailyRateSum,
     sanitized.vehicleType,
     sanitized.vehicleModel,
   )
-
-  // Calculate CDW
   const cdw = calculateCDW(days)
 
-  // Calculate prep fee
   const prepFee = roundToTwo(getPrepFee(sanitized.vehicleType))
-
-  // Calculate KM pricing
-  let kmPrice = 0
-  if (sanitized.kmPackage.type === 'package' && sanitized.kmPackage.value > 0) {
-    const packageCount = sanitized.kmPackage.value
-    const packageKm = packageCount * 1000
-    if (KM_PACKAGE_PRICES[packageKm] !== undefined) {
-      kmPrice = roundToTwo(KM_PACKAGE_PRICES[packageKm])
-    }
-  } else if (sanitized.kmPackage.type === 'per_km' && sanitized.kmPackage.value > 0) {
-    kmPrice = roundToTwo(sanitized.kmPackage.value * PER_KM_RATE)
-  }
-
-  // Calculate trailer hitch
+  const kmPackages = roundToTwo(sanitized.kmPackages * KM_PACKAGE_RATE)
   const hitch = roundToTwo(sanitized.vehicleType === 'trailer' ? TRAILER_HITCH_FEE : 0)
-
-  // Calculate generator
+  const extraKm = roundToTwo(sanitized.extraKm * EXTRA_KM_RATE)
   const generator = calculateGenerator(
     sanitized.generatorDailyUnlimited,
     sanitized.generatorHours,
     daysForDailyRateSum,
   )
-
-  // Calculate add-ons
   const cancellationWaiver = calculateCancellationWaiver(
     sanitized.cancellationWaiver,
     days,
@@ -396,13 +351,13 @@ export function calculateRentalQuote(
   const beddingKit = calculateBeddingKit(sanitized.beddingKitPeople)
   const bikeRack = calculateBikeRack(sanitized.bikeRack)
 
-  // Calculate subtotal and total
-  const subtotal = roundToTwo(basePrice + cdw)
+  const subtotal = roundToTwo(dailyRateTotal + cdw)
   const totalBeforeTax = roundToTwo(
     subtotal +
       prepFee +
-      kmPrice +
+      kmPackages +
       hitch +
+      extraKm +
       generator +
       cancellationWaiver +
       windshield +
@@ -413,32 +368,20 @@ export function calculateRentalQuote(
   const tax = roundToTwo(totalBeforeTax * TAX_RATE)
   const total = roundToTwo(totalBeforeTax + tax)
 
-  // Debug logs
-  console.log('[Rental Quote Calculation]')
-  console.log('Days:', days)
-  console.log('Daily Rates:', dailyRates)
-  console.log('Base Price (daily total):', basePrice)
-  console.log('CDW:', cdw)
-  console.log('Subtotal (base + cdw):', subtotal)
-  console.log('Total before tax:', totalBeforeTax)
-  console.log('Tax (13%):', tax)
-  console.log('Total:', total)
-
   const breakdown: RentalQuoteBreakdown = {
     days,
-    dailyRates,
-    basePrice: roundToTwo(basePrice),
+    dailyRateTotal: roundToTwo(dailyRateTotal),
     cdw: roundToTwo(cdw),
     prepFee: roundToTwo(prepFee),
-    kmPrice: roundToTwo(kmPrice),
+    kmPackages: roundToTwo(kmPackages),
     hitch: roundToTwo(hitch),
+    extraKm: roundToTwo(extraKm),
     generator: roundToTwo(generator),
     cancellationWaiver: roundToTwo(cancellationWaiver),
     windshield: roundToTwo(windshield),
     kitchenKit: roundToTwo(kitchenKit),
     beddingKit: roundToTwo(beddingKit),
     bikeRack: roundToTwo(bikeRack),
-    subtotal: roundToTwo(subtotal),
     tax: roundToTwo(tax),
   }
 

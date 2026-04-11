@@ -8,10 +8,11 @@ type Breakdown =
 
 const BREAKDOWN_LABELS: Record<string, string> = {
   days: 'Rental days (calendar)',
-  basePrice: 'Base daily rental',
+  dailyRateTotal: 'Base daily rental',
+  extraKm: 'Extra kilometers',
   cdw: 'CDW Plus',
   prepFee: 'Prep fee',
-  kmPrice: 'Mileage package',
+  kmPackages: 'Kilometer packages',
   hitch: 'Trailer hitch',
   generator: 'Generator',
   cancellationWaiver: 'Cancellation waiver',
@@ -19,7 +20,6 @@ const BREAKDOWN_LABELS: Record<string, string> = {
   kitchenKit: 'Kitchen kit',
   beddingKit: 'Bedding kit',
   bikeRack: 'Bike rack',
-  subtotal: 'Subtotal',
   tax: 'HST (13%)',
 }
 
@@ -65,9 +65,14 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
   // Days
   entries.push(['days', breakdown_.days])
   
-  // Base price (only show if > 0)
-  if (breakdown_.basePrice > 0) {
-    entries.push(['basePrice', formatCurrency(breakdown_.basePrice)])
+  // Base daily rental rate
+  if (breakdown_.dailyRateTotal > 0) {
+    entries.push(['dailyRateTotal', formatCurrency(breakdown_.dailyRateTotal)])
+  }
+
+  // Extra kilometers
+  if (breakdown_.extraKm > 0) {
+    entries.push(['extraKm', formatCurrency(breakdown_.extraKm)])
   }
 
   // CDW
@@ -80,9 +85,9 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
     entries.push(['prepFee', formatCurrency(breakdown_.prepFee)])
   }
 
-  // KM price
-  if (breakdown_.kmPrice > 0) {
-    entries.push(['kmPrice', formatCurrency(breakdown_.kmPrice)])
+  // KM packages
+  if (breakdown_.kmPackages > 0) {
+    entries.push(['kmPackages', formatCurrency(breakdown_.kmPackages)])
   }
 
   // Hitch
@@ -110,11 +115,6 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
   }
   if (breakdown_.bikeRack > 0) {
     entries.push(['bikeRack', formatCurrency(breakdown_.bikeRack)])
-  }
-
-  // Subtotal
-  if (breakdown_.subtotal > 0) {
-    entries.push(['subtotal', formatCurrency(breakdown_.subtotal)])
   }
 
   // Tax

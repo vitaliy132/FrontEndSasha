@@ -9,12 +9,12 @@ import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
-import { ConfirmationScreen, formatModelLabel, KM_PACKAGE_OPTIONS, useLeadForm, useRentalForm } from './index'
+import { formatModelLabel, useLeadForm, useRentalForm } from './index'
 import { Spinner } from './Spinner'
 
 
 export function RentalCalculator() {
-  const { formData, modelOptions, updateField, updateKmPackage, updatePerKmAmount, updateVehicleType, userId } = useRentalForm()
+  const { formData, modelOptions, updateField, updateVehicleType, userId } = useRentalForm()
   const { formData: leadFormData, updateField: updateLeadField } = useLeadForm()
 
   const apiBase = getApiBase()
@@ -27,11 +27,15 @@ export function RentalCalculator() {
   const [leadLoading, setLeadLoading] = useState(false)
   const [leadError, setLeadError] = useState<string | null>(null)
   const [leadSuccess, setLeadSuccess] = useState(false)
-  const [showConfirmation, setShowConfirmation] = useState(false)
 
   async function handleCalculate(e: FormEvent) {
     e.preventDefault()
     setCalcError(null)
+
+    const kmPackagesNum = Number(formData.kmPackages)
+    const extraKmNum = Number(formData.extraKm)
+    const generatorHoursNum = Number(formData.generatorHours)
+    const beddingKitPeopleNum = Number(formData.beddingKitPeople)
 
     const validationError = validateRentalForm({
       startDate: formData.startDate,
@@ -52,10 +56,11 @@ export function RentalCalculator() {
         cancellationWaiver: formData.cancellationWaiver,
         windshieldCoverage: formData.windshieldCoverage,
         generatorDailyUnlimited: formData.generatorDailyUnlimited,
-        kmPackage: formData.kmPackage,
-        generatorHours: Number(formData.generatorHours),
+        kmPackages: kmPackagesNum,
+        extraKm: extraKmNum,
+        generatorHours: generatorHoursNum,
         kitchenKit: formData.kitchenKit,
-        beddingKitPeople: Number(formData.beddingKitPeople),
+        beddingKitPeople: beddingKitPeopleNum,
         bikeRack: formData.bikeRack,
       })
       setResult(data)
@@ -104,7 +109,6 @@ export function RentalCalculator() {
         quote,
       })
       setLeadSuccess(true)
-      setShowConfirmation(true)
     } catch (err) {
       setLeadError(
         err instanceof Error ? err.message : 'Could not submit. Try again.',
@@ -112,14 +116,6 @@ export function RentalCalculator() {
     } finally {
       setLeadLoading(false)
     }
-  }
-
-  function handleCloseConfirmation() {
-    setShowConfirmation(false)
-    // Reset form for new calculation
-    setResult(null)
-    setShowBooking(false)
-    setLeadSuccess(false)
   }
 
   return (
@@ -329,76 +325,64 @@ export function RentalCalculator() {
                   </span>
                 </label>
 
-                <div>
-                  <label
-                    htmlFor="km-package"
-                    className="text-xs font-medium text-slate-700"
-                  >
-                    Mileage options
-                  </label>
-                  <select
-                    id="km-package"
-                    value={
-                      formData.kmPackage.type === 'per_km'
-                        ? '-1'
-                        : String(formData.kmPackage.value)
-                    }
-                    onChange={(e) => updateKmPackage(Number(e.target.value))}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                    disabled={calculating}
-                  >
-                    {KM_PACKAGE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                                {formData.kmPackage.type === 'per_km' && (
+                <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label
-                      htmlFor="per-km-amount"
+                      htmlFor="km-packages"
                       className="text-xs font-medium text-slate-700"
                     >
-                      Kilometers
+                      KM packages
                     </label>
                     <input
-                      id="per-km-amount"
+                      id="km-packages"
                       type="number"
                       inputMode="numeric"
                       min={0}
-                      step={100}
-                      value={formData.kmPackage.value}
-                      onChange={(e) => updatePerKmAmount(Number(e.target.value))}
+                      step={1}
+                      value={formData.kmPackages}
+                      onChange={(e) => updateField('kmPackages', e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                       disabled={calculating}
-                      placeholder="Enter total km"
                     />
-                    <p className="mt-1 text-xs text-slate-500">
-                      @ $0.41 per km
-                    </p>
                   </div>
-                )}
-
-                <div>
-                  <label
-                    htmlFor="generator-hours"
-                    className="text-xs font-medium text-slate-700"
-                  >
-                    Generator hours
-                  </label>
-                  <input
-                    id="generator-hours"
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="0.5"
-                    value={formData.generatorHours}
-                    onChange={(e) => updateField('generatorHours', e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                    disabled={calculating || formData.generatorDailyUnlimited}
-                  />
+                  <div>
+                    <label
+                      htmlFor="extra-km"
+                      className="text-xs font-medium text-slate-700"
+                    >
+                      Extra KM
+                    </label>
+                    <input
+                      id="extra-km"
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      step={1}
+                      value={formData.extraKm}
+                      onChange={(e) => updateField('extraKm', e.target.value)}
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                      disabled={calculating}
+                    />
+                  </div>
+                  <div className="sm:col-span-1">
+                    <label
+                      htmlFor="generator-hours"
+                      className="text-xs font-medium text-slate-700"
+                    >
+                      Generator hours
+                    </label>
+                    <input
+                      id="generator-hours"
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.5"
+                      value={formData.generatorHours}
+                      onChange={(e) => updateField('generatorHours', e.target.value)}
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                      disabled={calculating || formData.generatorDailyUnlimited}
+                    />
+                  </div>
                 </div>
 
                 {calcError ? (
@@ -418,10 +402,10 @@ export function RentalCalculator() {
                   {calculating ? (
                     <>
                       <Spinner className="text-white" />
-                      Checking…
+                      Calculating…
                     </>
                   ) : (
-                    'Check Availability'
+                    'Calculate estimate'
                   )}
                 </button>
               </form>
@@ -512,17 +496,6 @@ export function RentalCalculator() {
           </section>
         </div>
       </div>
-
-      {showConfirmation && result && (
-        <ConfirmationScreen
-          total={result.totalFormatted}
-          unit={formatModelLabel(formData.vehicleModel)}
-          startDate={formData.startDate}
-          endDate={formData.endDate}
-          name={leadFormData.name}
-          onClose={handleCloseConfirmation}
-        />
-      )}
     </div>
   )
 }
