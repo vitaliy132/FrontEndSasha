@@ -1,5 +1,14 @@
 export type VehicleType = 'classA' | 'classB' | 'classC' | 'trailer'
 
+export type SeasonName = 'PREMIUM' | 'PRIME' | 'SHOULDER' | 'ECONOMY'
+
+export type KmPackageType = 'package' | 'per_km'
+
+export interface KmPackage {
+  type: KmPackageType
+  value: number // package count or per_km amount
+}
+
 export interface RentalCalculateRequest {
   startDate: string
   endDate: string
@@ -10,31 +19,30 @@ export interface RentalCalculateRequest {
   windshieldCoverage: boolean
   /** When true, generator line uses $60 × billed daily days (min 5); hourly rate ignored. */
   generatorDailyUnlimited: boolean
-  kmPackages: number
-  extraKm: number
+  kmPackage: KmPackage
   generatorHours: number
   kitchenKit: boolean
   beddingKitPeople: number
   bikeRack: boolean
 }
 
-/** API + SPA quote breakdown (amounts in `kmPackages` / `extraKm` are dollars). */
+/** API + SPA quote breakdown (amounts in `kmPackage` / pricing are in dollars). */
 export interface RentalQuoteBreakdown {
   /** Calendar rental days (inclusive). */
   days: number
-  dailyRateTotal: number
+  dailyRates: { date: string; season: string; price: number }[]
+  basePrice: number
   cdw: number
   prepFee: number
-  /** Dollar cost for 1000 km packages ($350 each). */
-  kmPackages: number
+  kmPrice: number
   hitch: number
-  extraKm: number
   generator: number
   cancellationWaiver: number
   windshield: number
   kitchenKit: number
   beddingKit: number
   bikeRack: number
+  subtotal: number
   tax: number
 }
 

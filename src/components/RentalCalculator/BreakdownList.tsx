@@ -8,20 +8,27 @@ type Breakdown =
 
 const BREAKDOWN_LABELS: Record<string, string> = {
   days: 'Rental days (calendar)',
-  dailyRateTotal: 'Daily rates total',
+  basePrice: 'Base daily rental',
   cdw: 'CDW Plus',
   prepFee: 'Prep fee',
-  kmPackages: 'KM packages ($)',
+  kmPrice: 'Mileage package',
   hitch: 'Trailer hitch',
-  extraKm: 'Extra KM',
   generator: 'Generator',
   cancellationWaiver: 'Cancellation waiver',
   windshield: 'Windshield coverage',
+  kitchenKit: 'Kitchen kit',
+  beddingKit: 'Bedding kit',
+  bikeRack: 'Bike rack',
+  subtotal: 'Subtotal',
   tax: 'HST (13%)',
 }
 
 function formatLine(line: BreakdownLine): string {
   return line.amount ?? line.value ?? '—'
+}
+
+function formatCurrency(value: number): string {
+  return `$${value.toFixed(2)}`
 }
 
 export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
@@ -51,7 +58,70 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
     )
   }
 
-  const entries = Object.entries(breakdown)
+  // Handle RentalQuoteBreakdown object
+  const breakdown_ = breakdown as RentalQuoteBreakdown
+  const entries: Array<[string, string | number]> = []
+
+  // Days
+  entries.push(['days', breakdown_.days])
+  
+  // Base price (only show if > 0)
+  if (breakdown_.basePrice > 0) {
+    entries.push(['basePrice', formatCurrency(breakdown_.basePrice)])
+  }
+
+  // CDW
+  if (breakdown_.cdw > 0) {
+    entries.push(['cdw', formatCurrency(breakdown_.cdw)])
+  }
+
+  // Prep fee
+  if (breakdown_.prepFee > 0) {
+    entries.push(['prepFee', formatCurrency(breakdown_.prepFee)])
+  }
+
+  // KM price
+  if (breakdown_.kmPrice > 0) {
+    entries.push(['kmPrice', formatCurrency(breakdown_.kmPrice)])
+  }
+
+  // Hitch
+  if (breakdown_.hitch > 0) {
+    entries.push(['hitch', formatCurrency(breakdown_.hitch)])
+  }
+
+  // Generator
+  if (breakdown_.generator > 0) {
+    entries.push(['generator', formatCurrency(breakdown_.generator)])
+  }
+
+  // Add-ons
+  if (breakdown_.cancellationWaiver > 0) {
+    entries.push(['cancellationWaiver', formatCurrency(breakdown_.cancellationWaiver)])
+  }
+  if (breakdown_.windshield > 0) {
+    entries.push(['windshield', formatCurrency(breakdown_.windshield)])
+  }
+  if (breakdown_.kitchenKit > 0) {
+    entries.push(['kitchenKit', formatCurrency(breakdown_.kitchenKit)])
+  }
+  if (breakdown_.beddingKit > 0) {
+    entries.push(['beddingKit', formatCurrency(breakdown_.beddingKit)])
+  }
+  if (breakdown_.bikeRack > 0) {
+    entries.push(['bikeRack', formatCurrency(breakdown_.bikeRack)])
+  }
+
+  // Subtotal
+  if (breakdown_.subtotal > 0) {
+    entries.push(['subtotal', formatCurrency(breakdown_.subtotal)])
+  }
+
+  // Tax
+  if (breakdown_.tax > 0) {
+    entries.push(['tax', formatCurrency(breakdown_.tax)])
+  }
+
   if (entries.length === 0) return null
 
   return (
