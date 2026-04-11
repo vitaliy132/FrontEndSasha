@@ -1,6 +1,24 @@
-import type { BreakdownLine } from '../../types/rental'
+import type { BreakdownLine, RentalQuoteBreakdown } from '../../types/rental'
 
-type Breakdown = BreakdownLine[] | Record<string, string | number> | undefined
+type Breakdown =
+  | BreakdownLine[]
+  | Record<string, string | number>
+  | RentalQuoteBreakdown
+  | undefined
+
+const BREAKDOWN_LABELS: Record<string, string> = {
+  days: 'Rental days (calendar)',
+  dailyRateTotal: 'Daily rates total',
+  cdw: 'CDW Plus',
+  prepFee: 'Prep fee',
+  kmPackages: 'KM packages ($)',
+  hitch: 'Trailer hitch',
+  extraKm: 'Extra KM',
+  generator: 'Generator',
+  cancellationWaiver: 'Cancellation waiver',
+  windshield: 'Windshield coverage',
+  tax: 'HST (13%)',
+}
 
 function formatLine(line: BreakdownLine): string {
   return line.amount ?? line.value ?? '—'
@@ -47,7 +65,9 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
             key={label}
             className="flex items-start justify-between gap-4 text-sm text-slate-700"
           >
-            <span className="text-slate-600">{label}</span>
+            <span className="text-slate-600">
+              {BREAKDOWN_LABELS[label] ?? label}
+            </span>
             <span className="shrink-0 font-medium tabular-nums text-slate-900">
               {String(value)}
             </span>

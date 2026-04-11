@@ -17,12 +17,6 @@ export function validateRentalForm(input: {
   }
   if (end <= start) return 'End date must be after the start date.'
 
-  const rentalDays =
-    Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-  if (rentalDays < 5) {
-    return 'Rentals must be at least 5 days (including start and end).'
-  }
-
   if (
     !Number.isFinite(input.kmPackages) ||
     input.kmPackages < 0 ||

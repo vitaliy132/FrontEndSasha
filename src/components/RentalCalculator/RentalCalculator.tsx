@@ -1,7 +1,12 @@
 import type { FormEvent } from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getApiBase, submitLead } from '../../lib/api'
-import { calculateRentalQuote, RentalQuoteError } from '../../lib/rentalQuote'
+import {
+  calculateRentalQuote,
+  defaultVehicleModel,
+  listVehicleModels,
+  RentalQuoteError,
+} from '../../lib/rentalQuote'
 import { readRentalQueryParams } from '../../lib/urlParams'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
@@ -22,7 +27,16 @@ export function RentalCalculator() {
   const [vehicleType, setVehicleType] = useState<VehicleType>(
     initial.vehicleType,
   )
-  const [cdwPlus, setCdwPlus] = useState(initial.cdwPlus)
+  const [vehicleModel, setVehicleModel] = useState(initial.vehicleModel)
+  const [cancellationWaiver, setCancellationWaiver] = useState(
+    initial.cancellationWaiver,
+  )
+  const [windshieldCoverage, setWindshieldCoverage] = useState(
+    initial.windshieldCoverage,
+  )
+  const [generatorDailyUnlimited, setGeneratorDailyUnlimited] = useState(
+    initial.generatorDailyUnlimited,
+  )
   const [kmPackages, setKmPackages] = useState(String(initial.kmPackages))
   const [extraKm, setExtraKm] = useState(String(initial.extraKm))
   const [generatorHours, setGeneratorHours] = useState(
@@ -42,6 +56,21 @@ export function RentalCalculator() {
   const [leadSuccess, setLeadSuccess] = useState(false)
 
   const apiBase = getApiBase()
+
+  const modelOptions = useMemo(
+    () => listVehicleModels(vehicleType),
+    [vehicleType],
+  )
+
+  useEffect(() => {
+    if (!modelOptions.includes(vehicleModel)) {
+      setVehicleModel(defaultVehicleModel(vehicleType))
+    }
+  }, [vehicleType, vehicleModel, modelOptions])
+
+  function formatModelLabel(id: string) {
+    return id.replaceAll('_', ' ')
+  }
 
   async function handleCalculate(e: FormEvent) {
     e.preventDefault()
@@ -69,7 +98,10 @@ export function RentalCalculator() {
         startDate,
         endDate,
         vehicleType,
-        cdwPlus,
+        vehicleModel,
+        cancellationWaiver,
+        windshieldCoverage,
+        generatorDailyUnlimited,
         kmPackages: kmPackagesNum,
         extraKm: extraKmNum,
         generatorHours: generatorHoursNum,
@@ -223,28 +255,81 @@ export function RentalCalculator() {
                   <select
                     id="vehicle-type"
                     value={vehicleType}
-                    onChange={(e) =>
-                      setVehicleType(e.target.value as VehicleType)
-                    }
+                    onChange={(e) => {
+                      const vt = e.target.value as VehicleType
+                      setVehicleType(vt)
+                      setVehicleModel(defaultVehicleModel(vt))
+                    }}
                     className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                     disabled={calculating}
                   >
                     <option value="classA">Class A</option>
+                    <option value="classB">Class B</option>
                     <option value="classC">Class C</option>
                     <option value="trailer">Trailer</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="vehicle-model"
+                    className="text-xs font-medium text-slate-700"
+                  >
+                    Vehicle model
+                  </label>
+                  <select
+                    id="vehicle-model"
+                    value={vehicleModel}
+                    onChange={(e) => setVehicleModel(e.target.value)}
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    disabled={calculating}
+                  >
+                    {modelOptions.map((id) => (
+                      <option key={id} value={id}>
+                        {formatModelLabel(id)}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
                   <input
                     type="checkbox"
-                    checked={cdwPlus}
-                    onChange={(e) => setCdwPlus(e.target.checked)}
+                    checked={cancellationWaiver}
+                    onChange={(e) => setCancellationWaiver(e.target.checked)}
                     className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
-                    CDW Plus
+                    Cancellation waiver ($20/day, min $240)
+                  </span>
+                </label>
+
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={windshieldCoverage}
+                    onChange={(e) => setWindshieldCoverage(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    disabled={calculating}
+                  />
+                  <span className="text-sm font-medium text-slate-800">
+                    Windshield coverage
+                  </span>
+                </label>
+
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={generatorDailyUnlimited}
+                    onChange={(e) =>
+                      setGeneratorDailyUnlimited(e.target.checked)
+                    }
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    disabled={calculating}
+                  />
+                  <span className="text-sm font-medium text-slate-800">
+                    Generator unlimited ($60/day billed days)
                   </span>
                 </label>
 
@@ -303,7 +388,7 @@ export function RentalCalculator() {
                       value={generatorHours}
                       onChange={(e) => setGeneratorHours(e.target.value)}
                       className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                      disabled={calculating}
+                      disabled={calculating || generatorDailyUnlimited}
                     />
                   </div>
                 </div>

@@ -2,112 +2,259 @@ import {
   addDays,
   differenceInCalendarDays,
   format,
+  isValid,
   parseISO,
 } from 'date-fns'
-import type { RentalCalculateRequest, RentalCalculateResponse } from '../types/rental'
+import pricingConfig from '../config/rentalPricing.json'
+import type {
+  RentalCalculateRequest,
+  RentalCalculateResponse,
+  RentalQuoteBreakdown,
+  VehicleType,
+} from '../types/rental'
 
 const TAX_RATE = 0.13
-const MIN_DAYS = 5
+const MIN_CHARGE_DAYS_FOR_DAILY_RATE = 5
 const CDW_DAILY_RATE = 30
 const CDW_MINIMUM = 210
 const KM_PACKAGE_RATE = 350
 const TRAILER_HITCH_FEE = 150
 const EXTRA_KM_RATE = 0.41
 const GENERATOR_HOUR_RATE = 5
+const GENERATOR_DAILY_UNLIMITED_RATE = 60
+const CANCELLATION_DAILY_RATE = 20
+const CANCELLATION_MINIMUM = 240
 
-const SEASONS: { name: string; start: string; end: string; price: number }[] = [
-  { name: 'high', start: '06-01', end: '08-31', price: 200 },
-  { name: 'mid', start: '04-01', end: '05-31', price: 150 },
-  { name: 'low', start: '09-01', end: '03-31', price: 100 },
-]
+const { SEASONS: SEASON_DEFINITIONS, PRICING, defaults } = pricingConfig as {
+  SEASONS: {
+    PREMIUM: { start: string; end: string }
+    PRIME: { start: string; end: string }[]
+    SHOULDER: { start: string; end: string }[]
+    ECONOMY: { start: string; end: string }[]
+  }
+  PRICING: Record<
+    string,
+    Record<string, Record<string, number>>
+  >
+  defaults: { vehicleModelByType: Record<string, string> }
+}
 
-const roundToTwo = (num: number) => Number(num.toFixed(2))
+const roundToTwo = (num: number) => {
+  const n = Number(num)
+  if (!Number.isFinite(n)) return 0
+  return Number(n.toFixed(2))
+}
 
 const formatCurrency = (value: number) => `$${roundToTwo(value).toFixed(2)}`
 
-const isDateInSeason = (mmdd: string, season: (typeof SEASONS)[0]) => {
-  if (season.start <= season.end) {
-    return mmdd >= season.start && mmdd <= season.end
+function mmdd(date: Date) {
+  return format(date, 'MM-dd')
+}
+
+function inSeasonRange(d: string, start: string, end: string) {
+  if (start <= end) {
+    return d >= start && d <= end
   }
-  return mmdd >= season.start || mmdd <= season.end
+  return d >= start || d <= end
 }
 
-const getDailyRate = (date: Date) => {
-  const mmdd = format(date, 'MM-dd')
-  const season = SEASONS.find((item) => isDateInSeason(mmdd, item))
-  return season ? season.price : 100
+export type SeasonName = 'PREMIUM' | 'PRIME' | 'SHOULDER' | 'ECONOMY'
+
+export function getSeason(date: Date): SeasonName {
+  const d = mmdd(date)
+  const premium = SEASON_DEFINITIONS.PREMIUM
+  if (inSeasonRange(d, premium.start, premium.end)) {
+    return 'PREMIUM'
+  }
+  for (const r of SEASON_DEFINITIONS.PRIME) {
+    if (inSeasonRange(d, r.start, r.end)) return 'PRIME'
+  }
+  for (const r of SEASON_DEFINITIONS.SHOULDER) {
+    if (inSeasonRange(d, r.start, r.end)) return 'SHOULDER'
+  }
+  for (const r of SEASON_DEFINITIONS.ECONOMY) {
+    if (inSeasonRange(d, r.start, r.end)) return 'ECONOMY'
+  }
+  return 'ECONOMY'
 }
 
-const calculateDays = (startDate: Date, endDate: Date) =>
+export function listVehicleModels(vehicleType: VehicleType): string[] {
+  const table = PRICING[vehicleType]
+  if (!table) return []
+  return Object.keys(table)
+}
+
+export function defaultVehicleModel(vehicleType: VehicleType): string {
+  return defaults?.vehicleModelByType?.[vehicleType] ?? ''
+}
+
+function resolvePricingRow(vehicleType: VehicleType, vehicleModel: string) {
+  const table = PRICING[vehicleType]
+  if (!table) {
+    throw new RentalQuoteError(`Unknown vehicle type: ${vehicleType}`)
+  }
+  const row = table[vehicleModel]
+  if (!row) {
+    throw new RentalQuoteError(
+      `Unknown vehicle model "${vehicleModel}" for ${vehicleType}. Valid models: ${Object.keys(table).join(', ')}`,
+    )
+  }
+  return row
+}
+
+const calendarRentalDays = (startDate: Date, endDate: Date) =>
   differenceInCalendarDays(endDate, startDate) + 1
 
-const calculateDailyRateTotal = (startDate: Date, days: number) => {
+const billedDaysForDailyRates = (calendarDays: number) =>
+  Math.max(calendarDays, MIN_CHARGE_DAYS_FOR_DAILY_RATE)
+
+function calculateDailyRateTotal(
+  startDate: Date,
+  daysToSum: number,
+  vehicleType: VehicleType,
+  vehicleModel: string,
+) {
+  const row = resolvePricingRow(vehicleType, vehicleModel)
   let total = 0
-  for (let dayOffset = 0; dayOffset < days; dayOffset += 1) {
-    total += getDailyRate(addDays(startDate, dayOffset))
+  for (let dayOffset = 0; dayOffset < daysToSum; dayOffset += 1) {
+    const day = addDays(startDate, dayOffset)
+    const season = getSeason(day)
+    const price = row[season]
+    if (price == null || !Number.isFinite(Number(price))) {
+      throw new RentalQuoteError(`Missing rate for season ${season} on model ${vehicleModel}`)
+    }
+    total += Number(price)
   }
   return roundToTwo(total)
 }
 
-const getPrepFee = (vehicleType: RentalCalculateRequest['vehicleType']) =>
+const getPrepFee = (vehicleType: VehicleType) =>
   vehicleType === 'classA' ? 199 : 149
 
-const calculateCDW = (cdwPlus: boolean, days: number) => {
-  if (!cdwPlus) return 0
-  return roundToTwo(Math.max(days * CDW_DAILY_RATE, CDW_MINIMUM))
+const calculateCDW = (calendarDays: number) =>
+  roundToTwo(Math.max(calendarDays * CDW_DAILY_RATE, CDW_MINIMUM))
+
+const calculateCancellationWaiver = (enabled: boolean, calendarDays: number) => {
+  if (!enabled) return 0
+  return roundToTwo(Math.max(calendarDays * CANCELLATION_DAILY_RATE, CANCELLATION_MINIMUM))
 }
 
-const calculateExtras = (payload: RentalCalculateRequest) => {
+const calculateWindshield = (
+  vehicleType: VehicleType,
+  calendarDays: number,
+  enabled: boolean,
+) => {
+  if (!enabled) return 0
+  const days = Math.max(0, calendarDays)
+  if (vehicleType === 'classA') {
+    const raw = days * 35
+    return roundToTwo(Math.min(Math.max(raw, 250), 1000))
+  }
+  if (vehicleType === 'classB' || vehicleType === 'classC' || vehicleType === 'trailer') {
+    const raw = days * 20
+    return roundToTwo(Math.min(raw, 450))
+  }
+  return 0
+}
+
+const calculateGenerator = (
+  generatorDailyUnlimited: boolean,
+  generatorHours: number,
+  billedDayCount: number,
+) => {
+  if (generatorDailyUnlimited) {
+    return roundToTwo(GENERATOR_DAILY_UNLIMITED_RATE * billedDayCount)
+  }
+  return roundToTwo(toNonNegativeNumber(generatorHours, 0) * GENERATOR_HOUR_RATE)
+}
+
+const toFiniteNumber = (value: unknown, defaultValue = 0) => {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : defaultValue
+}
+
+const toNonNegativeNumber = (value: unknown, defaultValue = 0) => {
+  const n = toFiniteNumber(value, defaultValue)
+  return n < 0 ? defaultValue : n
+}
+
+const toNonNegativeInteger = (value: unknown, defaultValue = 0) => {
+  const n = Math.trunc(toFiniteNumber(value, defaultValue))
+  if (!Number.isFinite(n) || n < 0) return defaultValue
+  return n
+}
+
+const VALID_VEHICLE_TYPES: VehicleType[] = [
+  'classA',
+  'classB',
+  'classC',
+  'trailer',
+]
+
+export function sanitizePayload(
+  raw: Partial<RentalCalculateRequest> | null | undefined,
+) {
+  const vt = raw?.vehicleType
+  const vehicleType = VALID_VEHICLE_TYPES.includes(vt as VehicleType)
+    ? (vt as VehicleType)
+    : 'classC'
+
+  const defaultModel = defaults?.vehicleModelByType?.[vehicleType] ?? ''
+  const rawModel =
+    typeof raw?.vehicleModel === 'string' ? raw.vehicleModel.trim() : ''
+  const vehicleModel = rawModel || defaultModel
+
   return {
-    prepFee: roundToTwo(getPrepFee(payload.vehicleType)),
-    kmPackages: roundToTwo(payload.kmPackages * KM_PACKAGE_RATE),
-    hitch: roundToTwo(
-      payload.vehicleType === 'trailer' ? TRAILER_HITCH_FEE : 0,
-    ),
-    extraKm: roundToTwo((payload.extraKm || 0) * EXTRA_KM_RATE),
-    generator: roundToTwo((payload.generatorHours || 0) * GENERATOR_HOUR_RATE),
+    startDate: raw?.startDate,
+    endDate: raw?.endDate,
+    vehicleType,
+    vehicleModel,
+    cancellationWaiver: Boolean(raw?.cancellationWaiver),
+    windshieldCoverage: Boolean(raw?.windshieldCoverage),
+    generatorDailyUnlimited: Boolean(raw?.generatorDailyUnlimited),
+    kmPackages: toNonNegativeInteger(raw?.kmPackages, 0),
+    extraKm: toNonNegativeInteger(raw?.extraKm, 0),
+    generatorHours: toNonNegativeNumber(raw?.generatorHours, 0),
   }
 }
 
-const calculateTotal = ({
-  dailyRateTotal,
-  cdw,
-  extras,
-}: {
-  dailyRateTotal: number
-  cdw: number
-  extras: ReturnType<typeof calculateExtras>
-}) => {
-  const subtotal = roundToTwo(dailyRateTotal + cdw)
-  const totalBeforeTax = roundToTwo(
-    subtotal +
-      extras.prepFee +
-      extras.kmPackages +
-      extras.hitch +
-      extras.extraKm +
-      extras.generator,
-  )
-  const tax = roundToTwo(totalBeforeTax * TAX_RATE)
-  const total = roundToTwo(totalBeforeTax + tax)
-  return { subtotal, totalBeforeTax, tax, total }
-}
+const buildLineItems = (b: RentalQuoteBreakdown) => [
+  { name: 'Daily Rental', value: b.dailyRateTotal },
+  { name: 'CDW', value: b.cdw },
+  { name: 'Prep Fee', value: b.prepFee },
+  { name: 'KM Packages', value: b.kmPackages },
+  { name: 'Hitch', value: b.hitch },
+  { name: 'Extra KM', value: b.extraKm },
+  { name: 'Generator', value: b.generator },
+  { name: 'Cancellation Waiver', value: b.cancellationWaiver },
+  { name: 'Windshield Coverage', value: b.windshield },
+  { name: 'Tax', value: b.tax },
+]
 
 const buildSummaryMessage = ({
   total,
   vehicleType,
+  calendarDays,
 }: {
   total: number
-  vehicleType: RentalCalculateRequest['vehicleType']
+  vehicleType: VehicleType
+  calendarDays: number
 }) => {
   let summary =
     `Your estimated total for this rental is ${formatCurrency(total)}. ` +
-    'This includes the daily rental rate, Collision Damage Waiver, preparation fee, selected kilometer packages, taxes, a full tank of propane, and a full demonstration of the vehicle.'
+    'This includes the daily rental rate, preparation fee, kilometer packages where applicable, taxes, a full tank of propane, and a full demonstration of the vehicle.'
 
   if (vehicleType === 'trailer') {
     summary +=
       ' Please note: You must have a properly rated tow vehicle with hitch receiver, brake controller, and electrical adaptor installed.'
   }
 
+  if (calendarDays < MIN_CHARGE_DAYS_FOR_DAILY_RATE) {
+    summary += ` Base daily rates are charged for a minimum of ${MIN_CHARGE_DAYS_FOR_DAILY_RATE} days even when your selected dates are shorter.`
+  }
+
+  summary +=
+    ' CDW Plus (Collision Damage Waiver) is included in the total shown above, as listed in the breakdown.'
   summary += ' A $3000 security deposit is required.'
   return summary
 }
@@ -121,40 +268,98 @@ export class RentalQuoteError extends Error {
   }
 }
 
-/** Matches backend `rentalQuote.js` so estimates stay consistent with POST /calculate-rental. */
+/** Aligned with `Sasha-Project/src/services/rentalQuote.js` and `rentalPricing.json`. */
 export function calculateRentalQuote(
   payload: RentalCalculateRequest,
-): RentalCalculateResponse & { total: number } {
-  const startDate = parseISO(payload.startDate)
-  const endDate = parseISO(payload.endDate)
-  const days = calculateDays(startDate, endDate)
+): RentalCalculateResponse & {
+  total: number
+  lineItems: { name: string; value: number }[]
+} {
+  const sanitized = sanitizePayload(payload)
+  const startDate = parseISO(sanitized.startDate as string)
+  const endDate = parseISO(sanitized.endDate as string)
 
-  if (days < MIN_DAYS) {
-    throw new RentalQuoteError(`Rental must be at least ${MIN_DAYS} days`)
+  if (!isValid(startDate) || !isValid(endDate)) {
+    throw new RentalQuoteError('Invalid startDate or endDate')
+  }
+  if (endDate <= startDate) {
+    throw new RentalQuoteError('endDate must be after startDate')
   }
 
-  const dailyRateTotal = calculateDailyRateTotal(startDate, days)
-  const cdw = calculateCDW(payload.cdwPlus, days)
-  const extras = calculateExtras(payload)
-  const totals = calculateTotal({ dailyRateTotal, cdw, extras })
+  if (!sanitized.vehicleModel) {
+    throw new RentalQuoteError(
+      'vehicleModel is required (no default configured for this vehicle type)',
+    )
+  }
+
+  resolvePricingRow(sanitized.vehicleType, sanitized.vehicleModel)
+
+  const days = calendarRentalDays(startDate, endDate)
+  const daysForDailyRateSum = billedDaysForDailyRates(days)
+  const dailyRateTotal = calculateDailyRateTotal(
+    startDate,
+    daysForDailyRateSum,
+    sanitized.vehicleType,
+    sanitized.vehicleModel,
+  )
+  const cdw = calculateCDW(days)
+
+  const prepFee = roundToTwo(getPrepFee(sanitized.vehicleType))
+  const kmPackages = roundToTwo(sanitized.kmPackages * KM_PACKAGE_RATE)
+  const hitch = roundToTwo(sanitized.vehicleType === 'trailer' ? TRAILER_HITCH_FEE : 0)
+  const extraKm = roundToTwo(sanitized.extraKm * EXTRA_KM_RATE)
+  const generator = calculateGenerator(
+    sanitized.generatorDailyUnlimited,
+    sanitized.generatorHours,
+    daysForDailyRateSum,
+  )
+  const cancellationWaiver = calculateCancellationWaiver(
+    sanitized.cancellationWaiver,
+    days,
+  )
+  const windshield = calculateWindshield(
+    sanitized.vehicleType,
+    days,
+    sanitized.windshieldCoverage,
+  )
+
+  const subtotal = roundToTwo(dailyRateTotal + cdw)
+  const totalBeforeTax = roundToTwo(
+    subtotal +
+      prepFee +
+      kmPackages +
+      hitch +
+      extraKm +
+      generator +
+      cancellationWaiver +
+      windshield,
+  )
+  const tax = roundToTwo(totalBeforeTax * TAX_RATE)
+  const total = roundToTwo(totalBeforeTax + tax)
+
+  const breakdown: RentalQuoteBreakdown = {
+    days,
+    dailyRateTotal: roundToTwo(dailyRateTotal),
+    cdw: roundToTwo(cdw),
+    prepFee: roundToTwo(prepFee),
+    kmPackages: roundToTwo(kmPackages),
+    hitch: roundToTwo(hitch),
+    extraKm: roundToTwo(extraKm),
+    generator: roundToTwo(generator),
+    cancellationWaiver: roundToTwo(cancellationWaiver),
+    windshield: roundToTwo(windshield),
+    tax: roundToTwo(tax),
+  }
 
   return {
-    total: roundToTwo(totals.total),
-    totalFormatted: formatCurrency(totals.total),
+    total,
+    totalFormatted: formatCurrency(total),
     summaryMessage: buildSummaryMessage({
-      total: totals.total,
-      vehicleType: payload.vehicleType,
+      total,
+      vehicleType: sanitized.vehicleType,
+      calendarDays: days,
     }),
-    breakdown: {
-      days,
-      dailyRateTotal: roundToTwo(dailyRateTotal),
-      cdw: roundToTwo(cdw),
-      prepFee: roundToTwo(extras.prepFee),
-      kmPackages: roundToTwo(extras.kmPackages),
-      hitch: roundToTwo(extras.hitch),
-      extraKm: roundToTwo(extras.extraKm),
-      generator: roundToTwo(extras.generator),
-      tax: roundToTwo(totals.tax),
-    },
+    breakdown,
+    lineItems: buildLineItems(breakdown),
   }
 }

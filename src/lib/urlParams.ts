@@ -1,6 +1,12 @@
+import { defaultVehicleModel } from './rentalQuote'
 import type { VehicleType } from '../types/rental'
 
-const VEHICLE_TYPES: VehicleType[] = ['classA', 'classC', 'trailer']
+const VEHICLE_TYPES: VehicleType[] = [
+  'classA',
+  'classB',
+  'classC',
+  'trailer',
+]
 
 function getParam(search: URLSearchParams, ...keys: string[]): string | null {
   for (const key of keys) {
@@ -36,7 +42,10 @@ export interface RentalPrefill {
   startDate: string
   endDate: string
   vehicleType: VehicleType
-  cdwPlus: boolean
+  vehicleModel: string
+  cancellationWaiver: boolean
+  windshieldCoverage: boolean
+  generatorDailyUnlimited: boolean
   kmPackages: number
   extraKm: number
   generatorHours: number
@@ -50,8 +59,30 @@ export function readRentalQueryParams(search: string): RentalPrefill {
   const end = getParam(params, 'endDate', 'end_date') ?? ''
   const vehicle =
     parseVehicleType(getParam(params, 'vehicleType', 'vehicle_type')) ?? 'classA'
-  const cdw =
-    parseBool(getParam(params, 'cdwPlus', 'cdw_plus')) ?? false
+  const vehicleModelRaw = getParam(
+    params,
+    'vehicleModel',
+    'vehicle_model',
+    'model',
+  )
+  const vehicleModel =
+    vehicleModelRaw?.trim() || defaultVehicleModel(vehicle)
+  const cancellationWaiver =
+    parseBool(
+      getParam(params, 'cancellationWaiver', 'cancellation_waiver'),
+    ) ?? false
+  const windshieldCoverage =
+    parseBool(
+      getParam(params, 'windshieldCoverage', 'windshield_coverage'),
+    ) ?? false
+  const generatorDailyUnlimited =
+    parseBool(
+      getParam(
+        params,
+        'generatorDailyUnlimited',
+        'generator_daily_unlimited',
+      ),
+    ) ?? false
   const kmPackages =
     parseNonNegNumber(getParam(params, 'kmPackages', 'km_packages')) ?? 0
   const extraKm =
@@ -68,7 +99,10 @@ export function readRentalQueryParams(search: string): RentalPrefill {
     startDate: start,
     endDate: end,
     vehicleType: vehicle,
-    cdwPlus: cdw,
+    vehicleModel,
+    cancellationWaiver,
+    windshieldCoverage,
+    generatorDailyUnlimited,
     kmPackages,
     extraKm,
     generatorHours,
