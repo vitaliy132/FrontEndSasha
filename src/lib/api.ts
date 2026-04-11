@@ -15,12 +15,45 @@ export async function calculateRental(body: RentalCalculateRequest): Promise<Ren
     body: JSON.stringify(body),
   })
 
+  const contentType = res.headers.get('content-type')
+  const isJson = contentType?.includes('application/json')
+
   if (!res.ok) {
-    const text = await res.text()
-    throw new Error(text || `Request failed (${res.status})`)
+    let errorMessage = `Request failed (${res.status})`
+    if (isJson) {
+      try {
+        const errorData = await res.json() as { error?: string; message?: string }
+        errorMessage = errorData.message || errorData.error || errorMessage
+      } catch {
+        // If JSON parsing fails, try to get text
+        try {
+          const text = await res.text()
+          errorMessage = text || errorMessage
+        } catch {
+          // Fallback to status code message
+        }
+      }
+    } else {
+      try {
+        const text = await res.text()
+        errorMessage = text || errorMessage
+      } catch {
+        // Fallback to status code message
+      }
+    }
+    throw new Error(errorMessage)
   }
 
-  return res.json() as Promise<RentalCalculateResponse>
+  if (!isJson) {
+    const text = await res.text()
+    throw new Error(`Invalid response type: expected JSON, got ${contentType || 'unknown'}. Response: ${text}`)
+  }
+
+  try {
+    return (await res.json()) as RentalCalculateResponse
+  } catch (err) {
+    throw new Error(`Failed to parse response: ${err instanceof Error ? err.message : 'Unknown error'}`)
+  }
 }
 
 export async function submitLead(body: SubmitLeadRequest): Promise<void> {
@@ -30,8 +63,32 @@ export async function submitLead(body: SubmitLeadRequest): Promise<void> {
     body: JSON.stringify(body),
   })
 
+  const contentType = res.headers.get('content-type')
+  const isJson = contentType?.includes('application/json')
+
   if (!res.ok) {
-    const text = await res.text()
-    throw new Error(text || `Request failed (${res.status})`)
+    let errorMessage = `Request failed (${res.status})`
+    if (isJson) {
+      try {
+        const errorData = await res.json() as { error?: string; message?: string }
+        errorMessage = errorData.message || errorData.error || errorMessage
+      } catch {
+        // If JSON parsing fails, try to get text
+        try {
+          const text = await res.text()
+          errorMessage = text || errorMessage
+        } catch {
+          // Fallback to status code message
+        }
+      }
+    } else {
+      try {
+        const text = await res.text()
+        errorMessage = text || errorMessage
+      } catch {
+        // Fallback to status code message
+      }
+    }
+    throw new Error(errorMessage)
   }
 }
