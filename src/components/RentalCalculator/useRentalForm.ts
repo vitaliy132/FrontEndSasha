@@ -17,6 +17,9 @@ export interface RentalFormData {
   kmPackages: string
   extraKm: string
   generatorHours: string
+  kitchenKit: boolean
+  beddingKitPeople: string
+  bikeRack: boolean
 }
 
 export function useRentalForm() {
@@ -37,6 +40,9 @@ export function useRentalForm() {
     kmPackages: String(initial.kmPackages),
     extraKm: String(initial.extraKm),
     generatorHours: String(initial.generatorHours),
+    kitchenKit: initial.kitchenKit,
+    beddingKitPeople: String(initial.beddingKitPeople),
+    bikeRack: initial.bikeRack,
   })
 
   const modelOptions = useMemo(

@@ -49,6 +49,9 @@ export interface RentalPrefill {
   kmPackages: number
   extraKm: number
   generatorHours: number
+  kitchenKit: boolean
+  beddingKitPeople: number
+  bikeRack: boolean
 }
 
 export function readRentalQueryParams(search: string): RentalPrefill {
@@ -91,6 +94,12 @@ export function readRentalQueryParams(search: string): RentalPrefill {
     parseNonNegNumber(
       getParam(params, 'generatorHours', 'generator_hours'),
     ) ?? 0
+  const kitchenKit =
+    parseBool(getParam(params, 'kitchenKit', 'kitchen_kit')) ?? false
+  const beddingKitPeople =
+    parseNonNegNumber(getParam(params, 'beddingKitPeople', 'bedding_kit_people')) ?? 0
+  const bikeRack =
+    parseBool(getParam(params, 'bikeRack', 'bike_rack')) ?? false
 
   const userId = getParam(params, 'user_id', 'userId')
 
@@ -106,5 +115,8 @@ export function readRentalQueryParams(search: string): RentalPrefill {
     kmPackages,
     extraKm,
     generatorHours,
+    kitchenKit,
+    beddingKitPeople,
+    bikeRack,
   }
 }

@@ -35,6 +35,7 @@ export function RentalCalculator() {
     const kmPackagesNum = Number(formData.kmPackages)
     const extraKmNum = Number(formData.extraKm)
     const generatorHoursNum = Number(formData.generatorHours)
+    const beddingKitPeopleNum = Number(formData.beddingKitPeople)
 
     const validationError = validateRentalForm({
       startDate: formData.startDate,
@@ -61,6 +62,9 @@ export function RentalCalculator() {
         kmPackages: kmPackagesNum,
         extraKm: extraKmNum,
         generatorHours: generatorHoursNum,
+        kitchenKit: formData.kitchenKit,
+        beddingKitPeople: beddingKitPeopleNum,
+        bikeRack: formData.bikeRack,
       })
       setResult(data)
     } catch (err) {
@@ -275,6 +279,52 @@ export function RentalCalculator() {
                   />
                   <span className="text-sm font-medium text-slate-800">
                     Generator unlimited ($60/day billed days)
+                  </span>
+                </label>
+
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.kitchenKit}
+                    onChange={(e) => updateField('kitchenKit', e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    disabled={calculating}
+                  />
+                  <span className="text-sm font-medium text-slate-800">
+                    Kitchen Kit ($85/trip)
+                  </span>
+                </label>
+
+                <div>
+                  <label
+                    htmlFor="bedding-kit-people"
+                    className="text-xs font-medium text-slate-700"
+                  >
+                    Bedding Kit ($35/person)
+                  </label>
+                  <input
+                    id="bedding-kit-people"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={1}
+                    value={formData.beddingKitPeople}
+                    onChange={(e) => updateField('beddingKitPeople', e.target.value)}
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    disabled={calculating}
+                  />
+                </div>
+
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.bikeRack}
+                    onChange={(e) => updateField('bikeRack', e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    disabled={calculating}
+                  />
+                  <span className="text-sm font-medium text-slate-800">
+                    Bike Rack
                   </span>
                 </label>
 

@@ -13,6 +13,9 @@ export interface RentalCalculateRequest {
   kmPackages: number
   extraKm: number
   generatorHours: number
+  kitchenKit: boolean
+  beddingKitPeople: number
+  bikeRack: boolean
 }
 
 /** API + SPA quote breakdown (amounts in `kmPackages` / `extraKm` are dollars). */
@@ -29,6 +32,9 @@ export interface RentalQuoteBreakdown {
   generator: number
   cancellationWaiver: number
   windshield: number
+  kitchenKit: number
+  beddingKit: number
+  bikeRack: number
   tax: number
 }
 

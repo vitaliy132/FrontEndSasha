@@ -20,12 +20,8 @@ const CDW_MINIMUM = 210
 const KM_PACKAGE_RATE = 350
 const TRAILER_HITCH_FEE = 150
 const EXTRA_KM_RATE = 0.41
-const GENERATOR_HOUR_RATE = 5
-const GENERATOR_DAILY_UNLIMITED_RATE = 60
-const CANCELLATION_DAILY_RATE = 20
-const CANCELLATION_MINIMUM = 240
 
-const { SEASONS: SEASON_DEFINITIONS, PRICING, defaults } = pricingConfig as {
+const { SEASONS: SEASON_DEFINITIONS, PRICING, ADD_ONS, defaults } = pricingConfig as {
   SEASONS: {
     PREMIUM: { start: string; end: string }
     PRIME: { start: string; end: string }[]
@@ -36,6 +32,17 @@ const { SEASONS: SEASON_DEFINITIONS, PRICING, defaults } = pricingConfig as {
     string,
     Record<string, Record<string, number>>
   >
+  ADD_ONS: {
+    generator: { hourly: number; daily: number }
+    windshieldCoverage: {
+      classA: { perTrip: number; min: number; max: number }
+      classC: { perTrip: number; max: number }
+    }
+    cancellationWaiver: { daily: number; min: number }
+    kitchenKit: { perTrip: number }
+    beddingKit: { perPerson: number }
+    bikeRack: { perTrip: number }
+  }
   defaults: { vehicleModelByType: Record<string, string> }
 }
 
@@ -136,7 +143,7 @@ const calculateCDW = (calendarDays: number) =>
 
 const calculateCancellationWaiver = (enabled: boolean, calendarDays: number) => {
   if (!enabled) return 0
-  return roundToTwo(Math.max(calendarDays * CANCELLATION_DAILY_RATE, CANCELLATION_MINIMUM))
+  return roundToTwo(Math.max(calendarDays * ADD_ONS.cancellationWaiver.daily, ADD_ONS.cancellationWaiver.min))
 }
 
 const calculateWindshield = (
@@ -147,14 +154,26 @@ const calculateWindshield = (
   if (!enabled) return 0
   const days = Math.max(0, calendarDays)
   if (vehicleType === 'classA') {
-    const raw = days * 35
-    return roundToTwo(Math.min(Math.max(raw, 250), 1000))
+    const raw = days * ADD_ONS.windshieldCoverage.classA.perTrip
+    return roundToTwo(Math.min(Math.max(raw, ADD_ONS.windshieldCoverage.classA.min), ADD_ONS.windshieldCoverage.classA.max))
   }
   if (vehicleType === 'classB' || vehicleType === 'classC' || vehicleType === 'trailer') {
-    const raw = days * 20
-    return roundToTwo(Math.min(raw, 450))
+    const raw = days * ADD_ONS.windshieldCoverage.classC.perTrip
+    return roundToTwo(Math.min(raw, ADD_ONS.windshieldCoverage.classC.max))
   }
   return 0
+}
+
+const calculateKitchenKit = (enabled: boolean) => {
+  return enabled ? roundToTwo(ADD_ONS.kitchenKit.perTrip) : 0
+}
+
+const calculateBeddingKit = (people: number) => {
+  return roundToTwo(people * ADD_ONS.beddingKit.perPerson)
+}
+
+const calculateBikeRack = (enabled: boolean) => {
+  return enabled ? roundToTwo(ADD_ONS.bikeRack.perTrip) : 0
 }
 
 const calculateGenerator = (
@@ -163,9 +182,9 @@ const calculateGenerator = (
   billedDayCount: number,
 ) => {
   if (generatorDailyUnlimited) {
-    return roundToTwo(GENERATOR_DAILY_UNLIMITED_RATE * billedDayCount)
+    return roundToTwo(ADD_ONS.generator.daily * billedDayCount)
   }
-  return roundToTwo(toNonNegativeNumber(generatorHours, 0) * GENERATOR_HOUR_RATE)
+  return roundToTwo(toNonNegativeNumber(generatorHours, 0) * ADD_ONS.generator.hourly)
 }
 
 const toFiniteNumber = (value: unknown, defaultValue = 0) => {
@@ -215,6 +234,9 @@ export function sanitizePayload(
     kmPackages: toNonNegativeInteger(raw?.kmPackages, 0),
     extraKm: toNonNegativeInteger(raw?.extraKm, 0),
     generatorHours: toNonNegativeNumber(raw?.generatorHours, 0),
+    kitchenKit: Boolean(raw?.kitchenKit),
+    beddingKitPeople: toNonNegativeInteger(raw?.beddingKitPeople, 0),
+    bikeRack: Boolean(raw?.bikeRack),
   }
 }
 
@@ -228,6 +250,9 @@ const buildLineItems = (b: RentalQuoteBreakdown) => [
   { name: 'Generator', value: b.generator },
   { name: 'Cancellation Waiver', value: b.cancellationWaiver },
   { name: 'Windshield Coverage', value: b.windshield },
+  { name: 'Kitchen Kit', value: b.kitchenKit },
+  { name: 'Bedding Kit', value: b.beddingKit },
+  { name: 'Bike Rack', value: b.bikeRack },
   { name: 'Tax', value: b.tax },
 ]
 
@@ -322,6 +347,9 @@ export function calculateRentalQuote(
     days,
     sanitized.windshieldCoverage,
   )
+  const kitchenKit = calculateKitchenKit(sanitized.kitchenKit)
+  const beddingKit = calculateBeddingKit(sanitized.beddingKitPeople)
+  const bikeRack = calculateBikeRack(sanitized.bikeRack)
 
   const subtotal = roundToTwo(dailyRateTotal + cdw)
   const totalBeforeTax = roundToTwo(
@@ -332,7 +360,10 @@ export function calculateRentalQuote(
       extraKm +
       generator +
       cancellationWaiver +
-      windshield,
+      windshield +
+      kitchenKit +
+      beddingKit +
+      bikeRack,
   )
   const tax = roundToTwo(totalBeforeTax * TAX_RATE)
   const total = roundToTwo(totalBeforeTax + tax)
@@ -348,6 +379,9 @@ export function calculateRentalQuote(
     generator: roundToTwo(generator),
     cancellationWaiver: roundToTwo(cancellationWaiver),
     windshield: roundToTwo(windshield),
+    kitchenKit: roundToTwo(kitchenKit),
+    beddingKit: roundToTwo(beddingKit),
+    bikeRack: roundToTwo(bikeRack),
     tax: roundToTwo(tax),
   }
 
