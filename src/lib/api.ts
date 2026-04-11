@@ -9,11 +9,16 @@ export function getApiBase(): string {
 }
 
 export async function calculateRental(body: RentalCalculateRequest): Promise<RentalCalculateResponse> {
-  const res = await fetch(`${API_BASE}/calculate-rental`, {
+  const url = `${API_BASE}/calculate-rental`
+  console.log('API Request:', { url, body })
+  
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
+
+  console.log('API Response:', { status: res.status, statusText: res.statusText, headers: res.headers })
 
   const contentType = res.headers.get('content-type')
   const isJson = contentType?.includes('application/json')
@@ -24,7 +29,7 @@ export async function calculateRental(body: RentalCalculateRequest): Promise<Ren
       try {
         const errorData = await res.json() as { error?: string; message?: string }
         errorMessage = errorData.message || errorData.error || errorMessage
-      } catch {
+      } catch (parseErr) {
         // If JSON parsing fails, try to get text
         try {
           const text = await res.text()
@@ -41,18 +46,32 @@ export async function calculateRental(body: RentalCalculateRequest): Promise<Ren
         // Fallback to status code message
       }
     }
+    console.error('API Error:', errorMessage)
     throw new Error(errorMessage)
   }
 
   if (!isJson) {
     const text = await res.text()
-    throw new Error(`Invalid response type: expected JSON, got ${contentType || 'unknown'}. Response: ${text}`)
+    const err = `Invalid response type: expected JSON, got ${contentType || 'unknown'}. Response: ${text}`
+    console.error('Content Type Error:', err)
+    throw new Error(err)
   }
 
   try {
-    return (await res.json()) as RentalCalculateResponse
+    const responseText = await res.text()
+    console.log('Response Text:', responseText)
+    
+    if (!responseText || responseText.trim() === '') {
+      throw new Error('Response body is empty')
+    }
+    
+    const data = JSON.parse(responseText) as RentalCalculateResponse
+    console.log('Parsed Response:', data)
+    return data
   } catch (err) {
-    throw new Error(`Failed to parse response: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    const errorMsg = `Failed to parse response: ${err instanceof Error ? err.message : 'Unknown error'}`
+    console.error('Parse Error:', errorMsg)
+    throw new Error(errorMsg)
   }
 }
 
