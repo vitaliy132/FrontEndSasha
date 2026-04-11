@@ -13,10 +13,10 @@ export interface RentalFormData {
   vehicleModel: string
   cancellationWaiver: boolean
   windshieldCoverage: boolean
-  generatorDailyUnlimited: boolean
-  kmPackages: string
-  extraKm: string
+  generatorType: 'none' | 'hourly' | 'dailyUnlimited'
   generatorHours: string
+  mileagePackage: string
+  mileagePerKm: string
   kitchenKit: boolean
   beddingKitPeople: string
   bikeRack: boolean
@@ -36,10 +36,10 @@ export function useRentalForm() {
     vehicleModel: initialVehicleModel,
     cancellationWaiver: initial.cancellationWaiver,
     windshieldCoverage: initial.windshieldCoverage,
-    generatorDailyUnlimited: initial.generatorDailyUnlimited,
-    kmPackages: String(initial.kmPackages),
-    extraKm: String(initial.extraKm),
+    generatorType: initial.generatorDailyUnlimited ? 'dailyUnlimited' : (initial.generatorHours > 0 ? 'hourly' : 'none'),
     generatorHours: String(initial.generatorHours),
+    mileagePackage: '1000',
+    mileagePerKm: String(initial.extraKm || ''),
     kitchenKit: initial.kitchenKit,
     beddingKitPeople: String(initial.beddingKitPeople),
     bikeRack: initial.bikeRack,

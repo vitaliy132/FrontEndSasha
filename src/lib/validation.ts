@@ -3,14 +3,18 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export function validateRentalForm(input: {
   startDate: string
   endDate: string
+  vehicleType?: string
+  vehicleModel?: string
 }): string | null {
   if (!input.startDate.trim()) return 'Please choose a start date.'
   if (!input.endDate.trim()) return 'Please choose an end date.'
+  if (!input.vehicleType?.trim()) return 'Please select a vehicle type.'
+  if (!input.vehicleModel?.trim()) return 'Please select a vehicle model.'
 
   const start = new Date(input.startDate + 'T00:00:00')
   const end = new Date(input.endDate + 'T00:00:00')
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    return 'Dates are invalid.'
+    return 'Dates must be in valid ISO format (YYYY-MM-DD).'
   }
   if (end <= start) return 'End date must be after the start date.'
 

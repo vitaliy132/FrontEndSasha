@@ -28,14 +28,15 @@ export function RentalCalculator() {
     e.preventDefault()
     setCalcError(null)
 
-    const kmPackagesNum = Number(formData.kmPackages)
-    const extraKmNum = Number(formData.extraKm)
     const generatorHoursNum = Number(formData.generatorHours)
     const beddingKitPeopleNum = Number(formData.beddingKitPeople)
+    const mileagePerKmNum = Number(formData.mileagePerKm)
 
     const validationError = validateRentalForm({
       startDate: formData.startDate,
       endDate: formData.endDate,
+      vehicleType: formData.vehicleType,
+      vehicleModel: formData.vehicleModel,
     })
     if (validationError) {
       setCalcError(validationError)
@@ -44,6 +45,12 @@ export function RentalCalculator() {
 
     setCalculating(true)
     try {
+      // Convert new form fields to API fields
+      const kmPackagesNum = formData.mileagePackage !== 'perKm' ? Number(formData.mileagePackage) / 1000 : 0
+      const extraKmNum = formData.mileagePackage === 'perKm' ? mileagePerKmNum : 0
+      const generatorDailyUnlimited = formData.generatorType === 'dailyUnlimited'
+      const generatorHours = formData.generatorType === 'hourly' ? generatorHoursNum : 0
+
       const data = await calculateRental({
         startDate: formData.startDate,
         endDate: formData.endDate,
@@ -51,10 +58,10 @@ export function RentalCalculator() {
         vehicleModel: formData.vehicleModel,
         cancellationWaiver: formData.cancellationWaiver,
         windshieldCoverage: formData.windshieldCoverage,
-        generatorDailyUnlimited: formData.generatorDailyUnlimited,
+        generatorDailyUnlimited,
         kmPackages: kmPackagesNum,
         extraKm: extraKmNum,
-        generatorHours: generatorHoursNum,
+        generatorHours,
         kitchenKit: formData.kitchenKit,
         beddingKitPeople: beddingKitPeopleNum,
         bikeRack: formData.bikeRack,
@@ -183,6 +190,15 @@ export function RentalCalculator() {
                   </div>
                 </div>
 
+                <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3">
+                  <p className="text-xs font-medium text-amber-900">
+                    ⚠️ Minimum rental duration: 5 days
+                  </p>
+                  <p className="mt-1 text-xs text-amber-800">
+                    Shorter rentals will be charged for 5 days.
+                  </p>
+                </div>
+
                 <div>
                   <label
                     htmlFor="vehicle-type"
@@ -258,21 +274,6 @@ export function RentalCalculator() {
                 <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
                   <input
                     type="checkbox"
-                    checked={formData.generatorDailyUnlimited}
-                    onChange={(e) =>
-                      updateField('generatorDailyUnlimited', e.target.checked)
-                    }
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                    disabled={calculating}
-                  />
-                  <span className="text-sm font-medium text-slate-800">
-                    Generator unlimited ($60/day billed days)
-                  </span>
-                </label>
-
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
-                  <input
-                    type="checkbox"
                     checked={formData.kitchenKit}
                     onChange={(e) => updateField('kitchenKit', e.target.checked)}
                     className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
@@ -316,65 +317,119 @@ export function RentalCalculator() {
                   </span>
                 </label>
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <label
-                      htmlFor="km-packages"
-                      className="text-xs font-medium text-slate-700"
-                    >
-                      KM packages
-                    </label>
-                    <input
-                      id="km-packages"
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      step={1}
-                      value={formData.kmPackages}
-                      onChange={(e) => updateField('kmPackages', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                      disabled={calculating}
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="extra-km"
-                      className="text-xs font-medium text-slate-700"
-                    >
-                      Extra KM
-                    </label>
-                    <input
-                      id="extra-km"
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      step={1}
-                      value={formData.extraKm}
-                      onChange={(e) => updateField('extraKm', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                      disabled={calculating}
-                    />
-                  </div>
-                  <div className="sm:col-span-1">
-                    <label
-                      htmlFor="generator-hours"
-                      className="text-xs font-medium text-slate-700"
-                    >
-                      Generator hours
-                    </label>
-                    <input
-                      id="generator-hours"
-                      type="number"
-                      inputMode="decimal"
-                      min={0}
-                      step="0.5"
-                      value={formData.generatorHours}
-                      onChange={(e) => updateField('generatorHours', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                      disabled={calculating || formData.generatorDailyUnlimited}
-                    />
-                  </div>
+                {/* Mileage Options */}
+                <div>
+                  <label
+                    htmlFor="mileage-type"
+                    className="text-xs font-medium text-slate-700"
+                  >
+                    Mileage options
+                  </label>
+                  <select
+                    id="mileage-type"
+                    value={formData.mileagePackage}
+                    onChange={(e) => updateField('mileagePackage', e.target.value)}
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    disabled={calculating}
+                  >
+                    <option value="100">100 km ($39)</option>
+                    <option value="1000">1000 km ($350)</option>
+                    <option value="2000">2000 km ($700)</option>
+                    <option value="3000">3000 km ($1050)</option>
+                    <option value="4000">4000 km ($1400)</option>
+                    <option value="5000">5000 km ($1750)</option>
+                    <option value="perKm">Pay per km ($0.41/km)</option>
+                  </select>
                 </div>
+
+                {formData.mileagePackage === 'perKm' && (
+                  <div>
+                    <label
+                      htmlFor="mileage-per-km"
+                      className="text-xs font-medium text-slate-700"
+                    >
+                      Actual kilometers driven
+                    </label>
+                    <input
+                      id="mileage-per-km"
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      step={1}
+                      value={formData.mileagePerKm}
+                      onChange={(e) => updateField('mileagePerKm', e.target.value)}
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                      placeholder="Enter total kilometers"
+                      disabled={calculating}
+                    />
+                  </div>
+                )}
+
+                {/* Generator Options */}
+                <fieldset className="space-y-3">
+                  <legend className="text-xs font-medium text-slate-700">
+                    Generator options
+                  </legend>
+                  <div className="space-y-2">
+                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
+                      <input
+                        type="radio"
+                        name="generator"
+                        value="none"
+                        checked={formData.generatorType === 'none'}
+                        onChange={(e) => updateField('generatorType', e.target.value as any)}
+                        className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        disabled={calculating}
+                      />
+                      <span className="text-sm font-medium text-slate-800">
+                        None ($0)
+                      </span>
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
+                      <input
+                        type="radio"
+                        name="generator"
+                        value="hourly"
+                        checked={formData.generatorType === 'hourly'}
+                        onChange={(e) => updateField('generatorType', e.target.value as any)}
+                        className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        disabled={calculating}
+                      />
+                      <span className="text-sm font-medium text-slate-800">
+                        Hourly ($5/hour)
+                      </span>
+                    </label>
+                    {formData.generatorType === 'hourly' && (
+                      <div className="ml-7">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min={0}
+                          step="0.5"
+                          value={formData.generatorHours}
+                          onChange={(e) => updateField('generatorHours', e.target.value)}
+                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                          placeholder="Hours"
+                          disabled={calculating}
+                        />
+                      </div>
+                    )}
+                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
+                      <input
+                        type="radio"
+                        name="generator"
+                        value="dailyUnlimited"
+                        checked={formData.generatorType === 'dailyUnlimited'}
+                        onChange={(e) => updateField('generatorType', e.target.value as any)}
+                        className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        disabled={calculating}
+                      />
+                      <span className="text-sm font-medium text-slate-800">
+                        Daily unlimited ($60/day)
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
 
                 {calcError ? (
                   <p

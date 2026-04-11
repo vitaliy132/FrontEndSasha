@@ -16,19 +16,24 @@
   },
   "PRICING": {
     "classA": {
-      "30_slide_2024": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 },
-      "32_bunks_2017": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 },
-      "25_slide_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
+      "30ft_2024": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 },
+      "32ft_2017": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 },
+      "34ft_2023": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 },
+      "35ft_2025": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 },
+      "36ft_2025": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 },
+      "31ft_2019": { "PREMIUM": 289, "PRIME": 234, "SHOULDER": 154, "ECONOMY": 119 }
     },
     "classB": {
-      "mercedes_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
+      "23ft_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
     },
     "classC": {
-      "mercedes_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
+      "23ft_2020_2026": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 },
+      "25ft_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 },
+      "25ft_2018_economy": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
     },
     "trailer": {
-      "19_2023": { "PREMIUM": 174, "PRIME": 134, "SHOULDER": 89, "ECONOMY": 84 },
-      "21_2023": { "PREMIUM": 199, "PRIME": 149, "SHOULDER": 99, "ECONOMY": 94 }
+      "19ft_2023": { "PREMIUM": 174, "PRIME": 134, "SHOULDER": 89, "ECONOMY": 84 },
+      "27ft_bunks_2024": { "PREMIUM": 199, "PRIME": 149, "SHOULDER": 99, "ECONOMY": 94 }
     }
   },
   "ADD_ONS": {
@@ -63,10 +68,10 @@
   },
   "defaults": {
     "vehicleModelByType": {
-      "classA": "25_slide_2021_2023",
-      "classB": "mercedes_2021_2023",
-      "classC": "mercedes_2021_2023",
-      "trailer": "19_2023"
+      "classA": "30ft_2024",
+      "classB": "23ft_2021_2023",
+      "classC": "23ft_2020_2026",
+      "trailer": "19ft_2023"
     }
   }
 }
