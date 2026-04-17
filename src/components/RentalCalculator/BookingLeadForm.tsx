@@ -47,12 +47,13 @@ export function BookingLeadForm({
       </div>
 
       {success ? (
-        <p
-          className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 ring-1 ring-emerald-200"
+        <div
+          className="mt-4 rounded-lg bg-emerald-50 px-3 py-4 text-sm text-emerald-800 ring-1 ring-emerald-200"
           role="status"
         >
-          Thanks — your request was sent. We&apos;ll contact you shortly.
-        </p>
+          <p className="font-medium">Thank you! Your request has been received.</p>
+          <p className="mt-1">Our team will contact you shortly to confirm availability.</p>
+        </div>
       ) : (
         <form onSubmit={onSubmit} className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
