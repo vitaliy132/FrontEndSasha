@@ -75,8 +75,15 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
   // Prep fee
   entries.push(['prepFee', formatCurrency(breakdown_.prepFee)])
 
+  // Kilometer packages
+  if (breakdown_.kmPackages > 0) {
+    entries.push(['kmPackages', formatCurrency(breakdown_.kmPackages)])
+  }
+
   // Mileage
-  entries.push(['extraKm', formatCurrency(breakdown_.extraKm)])
+  if (breakdown_.extraKm > 0) {
+    entries.push(['extraKm', formatCurrency(breakdown_.extraKm)])
+  }
 
   // Cancellation Waiver
   entries.push(['cancellationWaiver', formatCurrency(breakdown_.cancellationWaiver)])
