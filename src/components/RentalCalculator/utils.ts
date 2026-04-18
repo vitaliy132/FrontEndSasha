@@ -4,11 +4,15 @@ export function formatModelLabel(id: string): string {
 
   const size = parts[0]
   const hasSlideOut = parts.includes('slide') && parts.includes('out')
+  const isEconomy = parts.includes('economy')
   const yearParts = parts.filter(p => /^\d{4}$/.test(p))
 
   let label = size
   if (hasSlideOut) {
     label += ' Slide Out'
+  }
+  if (isEconomy) {
+    label += ' Economy'
   }
 
   if (yearParts.length > 0) {
