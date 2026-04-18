@@ -1,3 +1,23 @@
 export function formatModelLabel(id: string): string {
-  return id.replaceAll('_', ' ')
+  const parts = id.split('_')
+  if (parts.length < 2) return id.replaceAll('_', ' ')
+
+  const size = parts[0]
+  const hasSlideOut = parts.includes('slide') && parts.includes('out')
+  const yearParts = parts.filter(p => /^\d{4}$/.test(p))
+
+  let label = size
+  if (hasSlideOut) {
+    label += ' Slide Out'
+  }
+
+  if (yearParts.length > 0) {
+    if (yearParts.length === 1) {
+      label += ` (${yearParts[0]})`
+    } else if (yearParts.length === 2) {
+      label += ` (${yearParts[0]}–${yearParts[1]})`
+    }
+  }
+
+  return label
 }

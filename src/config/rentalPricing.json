@@ -25,9 +25,10 @@
       "23ft_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
     },
     "classC": {
-      "23ft_2020_2026": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 },
-      "25ft_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 },
-      "25ft_2018_economy": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
+      "31ft_slide_out_2019": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 },
+      "25ft_slide_out_2021_2023": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 },
+      "25ft_slide_out_2018": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 },
+      "23ft_2020_2026": { "PREMIUM": 244, "PRIME": 189, "SHOULDER": 119, "ECONOMY": 94 }
     },
     "trailer": {
       "19ft_2023": { "PREMIUM": 174, "PRIME": 134, "SHOULDER": 89, "ECONOMY": 84 },
@@ -68,7 +69,7 @@
     "vehicleModelByType": {
       "classA": "30ft_2024",
       "classB": "23ft_2021_2023",
-      "classC": "23ft_2020_2026",
+      "classC": "31ft_slide_out_2019",
       "trailer": "19ft_2023"
     }
   }
