@@ -64,7 +64,7 @@ export function ConfirmationScreen({
           <div className="border-t border-slate-200 pt-4">
             <div className="flex justify-between">
               <span className="text-sm font-medium text-slate-600">Total</span>
-              <span className="text-lg font-bold text-indigo-600">{total}</span>
+              <span className="text-lg font-bold text-emerald-600">{total}</span>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@ export function ConfirmationScreen({
 
         <button
           onClick={onClose}
-          className="mt-6 w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+          className="mt-6 w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
         >
           Close
         </button>

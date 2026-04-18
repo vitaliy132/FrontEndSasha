@@ -120,14 +120,14 @@ export function RentalCalculator() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-indigo-400/20 blur-3xl" />
-        <div className="absolute -right-24 top-40 h-80 w-80 rounded-full bg-violet-400/15 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
+        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl" />
+        <div className="absolute -right-24 top-40 h-80 w-80 rounded-full bg-lime-400/15 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-teal-400/10 blur-3xl" />
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <header className="mb-10 text-center lg:mb-12 lg:text-left">
-          <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
+          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
             Fleet rentals
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -169,7 +169,7 @@ export function RentalCalculator() {
                       type="date"
                       value={formData.startDate}
                       onChange={(e) => updateField('startDate', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                       disabled={calculating}
                     />
                   </div>
@@ -185,7 +185,7 @@ export function RentalCalculator() {
                       type="date"
                       value={formData.endDate}
                       onChange={(e) => updateField('endDate', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                       disabled={calculating}
                     />
                   </div>
@@ -214,7 +214,7 @@ export function RentalCalculator() {
                       const vt = e.target.value as VehicleType
                       updateVehicleType(vt)
                     }}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     disabled={calculating}
                   >
                     <option value="classA">Class A</option>
@@ -235,7 +235,7 @@ export function RentalCalculator() {
                     id="vehicle-model"
                     value={formData.vehicleModel}
                     onChange={(e) => updateField('vehicleModel', e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     disabled={calculating}
                   >
                     {modelOptions.map((id: string) => (
@@ -251,7 +251,7 @@ export function RentalCalculator() {
                     type="checkbox"
                     checked={formData.cancellationWaiver}
                     onChange={(e) => updateField('cancellationWaiver', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
@@ -264,7 +264,7 @@ export function RentalCalculator() {
                     type="checkbox"
                     checked={formData.windshieldCoverage}
                     onChange={(e) => updateField('windshieldCoverage', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
@@ -277,7 +277,7 @@ export function RentalCalculator() {
                     type="checkbox"
                     checked={formData.kitchenKit}
                     onChange={(e) => updateField('kitchenKit', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
@@ -300,7 +300,7 @@ export function RentalCalculator() {
                     step={1}
                     value={formData.beddingKitPeople}
                     onChange={(e) => updateField('beddingKitPeople', e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     disabled={calculating}
                   />
                 </div>
@@ -310,7 +310,7 @@ export function RentalCalculator() {
                     type="checkbox"
                     checked={formData.bikeRack}
                     onChange={(e) => updateField('bikeRack', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
@@ -330,7 +330,7 @@ export function RentalCalculator() {
                     id="mileage-type"
                     value={formData.mileagePackage}
                     onChange={(e) => updateField('mileagePackage', e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     disabled={calculating}
                   >
                     <option value="100">100 km ($39)</option>
@@ -359,7 +359,7 @@ export function RentalCalculator() {
                       step={1}
                       value={formData.mileagePerKm}
                       onChange={(e) => updateField('mileagePerKm', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                       placeholder="Enter total kilometers"
                       disabled={calculating}
                     />
@@ -379,7 +379,7 @@ export function RentalCalculator() {
                         value="none"
                         checked={formData.generatorType === 'none'}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        className="h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500"
                         disabled={calculating}
                       />
                       <span className="text-sm font-medium text-slate-800">
@@ -393,7 +393,7 @@ export function RentalCalculator() {
                         value="hourly"
                         checked={formData.generatorType === 'hourly'}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        className="h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500"
                         disabled={calculating}
                       />
                       <span className="text-sm font-medium text-slate-800">
@@ -409,7 +409,7 @@ export function RentalCalculator() {
                           step="0.5"
                           value={formData.generatorHours}
                           onChange={(e) => updateField('generatorHours', e.target.value)}
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                           placeholder="Hours"
                           disabled={calculating}
                         />
@@ -422,7 +422,7 @@ export function RentalCalculator() {
                         value="dailyUnlimited"
                         checked={formData.generatorType === 'dailyUnlimited'}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        className="h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500"
                         disabled={calculating}
                       />
                       <span className="text-sm font-medium text-slate-800">
@@ -444,7 +444,7 @@ export function RentalCalculator() {
                 <button
                   type="submit"
                   disabled={calculating}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {calculating ? (
                     <>
@@ -486,7 +486,7 @@ export function RentalCalculator() {
                     className="mt-10 flex flex-col items-center justify-center gap-3 py-16"
                     aria-live="polite"
                   >
-                    <Spinner className="text-indigo-600" />
+                    <Spinner className="text-emerald-600" />
                     <p className="text-sm font-medium text-slate-600">
                       Calculating…
                     </p>
@@ -517,7 +517,7 @@ export function RentalCalculator() {
                           setLeadSuccess(false)
                           setLeadError(null)
                         }}
-                        className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm ring-1 ring-indigo-200 transition hover:bg-indigo-50"
+                        className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:bg-emerald-50"
                       >
                         Request booking
                       </button>
