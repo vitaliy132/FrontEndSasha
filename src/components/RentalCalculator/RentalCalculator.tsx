@@ -1,8 +1,9 @@
-import type { FormEvent } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { useState } from 'react'
 import { getApiBase, submitLead, calculateRental } from '../../lib/api'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
+import type { RentalFormData } from './useRentalForm'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
 import { formatModelLabel, useLeadForm, useRentalForm } from './index'
@@ -377,7 +378,7 @@ export function RentalCalculator() {
                         name="generator"
                         value="none"
                         checked={formData.generatorType === 'none'}
-                        onChange={(e) => updateField('generatorType', e.target.value as any)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
                         className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
                         disabled={calculating}
                       />
@@ -391,7 +392,7 @@ export function RentalCalculator() {
                         name="generator"
                         value="hourly"
                         checked={formData.generatorType === 'hourly'}
-                        onChange={(e) => updateField('generatorType', e.target.value as any)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
                         className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
                         disabled={calculating}
                       />
@@ -420,7 +421,7 @@ export function RentalCalculator() {
                         name="generator"
                         value="dailyUnlimited"
                         checked={formData.generatorType === 'dailyUnlimited'}
-                        onChange={(e) => updateField('generatorType', e.target.value as any)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
                         className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
                         disabled={calculating}
                       />

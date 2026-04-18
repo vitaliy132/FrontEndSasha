@@ -29,7 +29,7 @@ export async function calculateRental(body: RentalCalculateRequest): Promise<Ren
       try {
         const errorData = await res.json() as { error?: string; message?: string }
         errorMessage = errorData.message || errorData.error || errorMessage
-      } catch (parseErr) {
+      } catch {
         // If JSON parsing fails, try to get text
         try {
           const text = await res.text()
