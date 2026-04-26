@@ -17,7 +17,6 @@ const BREAKDOWN_LABELS: Record<string, string> = {
   generator: 'Generator',
   cancellationWaiver: 'Cancellation Waiver',
   windshield: 'Windshield Coverage',
-  generator: 'Generator',
   kitchenKit: 'Kitchen Kit',
   beddingKit: 'Bedding Kit',
   bikeRack: 'Bike Rack',
