@@ -25,6 +25,15 @@ export function RentalCalculator() {
   const [leadError, setLeadError] = useState<string | null>(null)
   const [leadSuccess, setLeadSuccess] = useState(false)
 
+  const selectedDays = (() => {
+    if (!formData.startDate || !formData.endDate) return null
+    const start = new Date(`${formData.startDate}T00:00:00`)
+    const end = new Date(`${formData.endDate}T00:00:00`)
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null
+    if (end <= start) return null
+    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  })()
+
   async function handleCalculate(e: FormEvent) {
     e.preventDefault()
     setCalcError(null)
@@ -42,26 +51,15 @@ export function RentalCalculator() {
       return
     }
 
-    // Calculate selected days and enforce minimum 5 days
-    const start = new Date(formData.startDate)
-    const end = new Date(formData.endDate)
-    const selectedDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1 // inclusive days
-    const chargedDays = Math.max(selectedDays, 5)
-
-    // Adjust endDate if necessary to ensure at least 5 days
-    const adjustedEndDate = new Date(start)
-    adjustedEndDate.setDate(start.getDate() + chargedDays - 1) // -1 because inclusive
-
     setCalculating(true)
     try {
-      // Convert new form fields to API fields
       const kmPackagesNum = formData.vehicleType === 'trailer' ? 0 : Number(formData.mileagePackage)
       const extraKmNum = 0
       const generatorDailyUnlimited = formData.generatorType === 'dailyUnlimited'
 
       const data = await calculateRental({
         startDate: formData.startDate,
-        endDate: adjustedEndDate.toISOString().split('T')[0], // Use adjusted end date
+        endDate: formData.endDate,
         vehicleType: formData.vehicleType,
         vehicleModel: formData.vehicleModel,
         cancellationWaiver: formData.cancellationWaiver,
@@ -198,11 +196,13 @@ export function RentalCalculator() {
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3">
-                  <p className="text-xs font-medium text-amber-900">
-                    Minimum rental price: 5 days, shorter rentals will be charged a 5 day minimum rental price
-                  </p>
-                </div>
+                {selectedDays !== null && selectedDays < 5 ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3">
+                    <p className="text-xs font-medium text-amber-900">
+                      Minimum rental price: 5 days, shorter rentals will be charged a 5 day minimum rental price
+                    </p>
+                  </div>
+                ) : null}
 
                 <div>
                   <label
@@ -443,13 +443,7 @@ export function RentalCalculator() {
                   <div className="mt-6">
                     <div className="rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
                       <p className="text-sm leading-relaxed text-white/85">
-                        Your estimated price for this rental is {result.totalFormatted}.
-                      </p>
-                      <p className="mt-2 text-sm leading-relaxed text-white/85">
-                        This includes the daily rental rate, CDW Plus (Collision Damage Waiver), preparation fee, kilometer packages where applicable, taxes, a full tank of propane, and a full demonstration of the vehicle, as listed in the breakdown below.
-                      </p>
-                      <p className="mt-2 text-sm leading-relaxed text-white/85">
-                        A $3000 security deposit is required at pickup.
+                        {result.summaryMessage}
                       </p>
                     </div>
 
