@@ -29,7 +29,6 @@ export function RentalCalculator() {
     e.preventDefault()
     setCalcError(null)
 
-    const generatorHoursNum = Number(formData.generatorHours)
     const beddingKitPeopleNum = Number(formData.beddingKitPeople)
 
     const validationError = validateRentalForm({
@@ -59,7 +58,6 @@ export function RentalCalculator() {
       const kmPackagesNum = Number(formData.mileagePackage)
       const extraKmNum = 0
       const generatorDailyUnlimited = formData.generatorType === 'dailyUnlimited'
-      const generatorHours = formData.generatorType === 'hourly' ? generatorHoursNum : 0
 
       const data = await calculateRental({
         startDate: formData.startDate,
@@ -71,7 +69,6 @@ export function RentalCalculator() {
         generatorDailyUnlimited,
         kmPackages: kmPackagesNum,
         extraKm: extraKmNum,
-        generatorHours,
         kitchenKit: formData.kitchenKit,
         beddingKitPeople: beddingKitPeopleNum,
         bikeRack: false,
@@ -359,35 +356,6 @@ export function RentalCalculator() {
                         None ($0)
                       </span>
                     </label>
-                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
-                      <input
-                        type="radio"
-                        name="generator"
-                        value="hourly"
-                        checked={formData.generatorType === 'hourly'}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className="h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                        disabled={calculating}
-                      />
-                      <span className="text-sm font-medium text-slate-800">
-                        Hourly
-                      </span>
-                    </label>
-                    {formData.generatorType === 'hourly' && (
-                      <div className="ml-7">
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          min={0}
-                          step="0.5"
-                          value={formData.generatorHours}
-                          onChange={(e) => updateField('generatorHours', e.target.value)}
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                          placeholder="Hours"
-                          disabled={calculating}
-                        />
-                      </div>
-                    )}
                     <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
                       <input
                         type="radio"

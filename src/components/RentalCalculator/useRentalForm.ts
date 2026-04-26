@@ -13,8 +13,7 @@ export interface RentalFormData {
   vehicleModel: string
   cancellationWaiver: boolean
   windshieldCoverage: boolean
-  generatorType: 'none' | 'hourly' | 'dailyUnlimited'
-  generatorHours: string
+  generatorType: 'none' | 'dailyUnlimited'
   mileagePackage: string
   mileagePerKm: string
   kitchenKit: boolean
@@ -35,8 +34,7 @@ export function useRentalForm() {
     vehicleModel: initialVehicleModel,
     cancellationWaiver: initial.cancellationWaiver,
     windshieldCoverage: initial.windshieldCoverage,
-    generatorType: initial.generatorDailyUnlimited ? 'dailyUnlimited' : (initial.generatorHours > 0 ? 'hourly' : 'none'),
-    generatorHours: String(initial.generatorHours),
+    generatorType: initial.generatorDailyUnlimited ? 'dailyUnlimited' : 'none',
     mileagePackage: '0',
     mileagePerKm: String(initial.extraKm || ''),
     kitchenKit: initial.kitchenKit,

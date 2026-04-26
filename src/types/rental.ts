@@ -12,7 +12,6 @@ export interface RentalCalculateRequest {
   generatorDailyUnlimited: boolean
   kmPackages: number
   extraKm: number
-  generatorHours: number
   kitchenKit: boolean
   beddingKitPeople: number
   bikeRack: boolean
