@@ -6,7 +6,7 @@ import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
-import { formatModelLabel, useLeadForm, useRentalForm } from './index'
+import { formatModelLabel, useLeadForm, useRentalForm, inputClasses, labelClasses, checkboxClasses, checkboxLabelClasses, radioLabelClasses, buttonClasses, errorClasses } from './index'
 import { Spinner } from './Spinner'
 
 
@@ -165,7 +165,7 @@ export function RentalCalculator() {
                   <div>
                     <label
                       htmlFor="start-date"
-                      className="text-xs font-medium text-slate-700"
+                      className={labelClasses}
                     >
                       Start date
                     </label>
@@ -174,14 +174,14 @@ export function RentalCalculator() {
                       type="date"
                       value={formData.startDate}
                       onChange={(e) => updateField('startDate', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                      className={inputClasses}
                       disabled={calculating}
                     />
                   </div>
                   <div>
                     <label
                       htmlFor="end-date"
-                      className="text-xs font-medium text-slate-700"
+                      className={labelClasses}
                     >
                       End date
                     </label>
@@ -190,7 +190,7 @@ export function RentalCalculator() {
                       type="date"
                       value={formData.endDate}
                       onChange={(e) => updateField('endDate', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                      className={inputClasses}
                       disabled={calculating}
                     />
                   </div>
@@ -207,7 +207,7 @@ export function RentalCalculator() {
                 <div>
                   <label
                     htmlFor="vehicle-type"
-                    className="text-xs font-medium text-slate-700"
+                    className={labelClasses}
                   >
                     Vehicle type
                   </label>
@@ -218,7 +218,7 @@ export function RentalCalculator() {
                       const vt = e.target.value as VehicleType
                       updateVehicleType(vt)
                     }}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                    className={inputClasses}
                     disabled={calculating}
                   >
                     <option value="classA">Class A</option>
@@ -231,7 +231,7 @@ export function RentalCalculator() {
                 <div>
                   <label
                     htmlFor="vehicle-model"
-                    className="text-xs font-medium text-slate-700"
+                    className={labelClasses}
                   >
                     Vehicle model
                   </label>
@@ -239,7 +239,7 @@ export function RentalCalculator() {
                     id="vehicle-model"
                     value={formData.vehicleModel}
                     onChange={(e) => updateField('vehicleModel', e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                    className={inputClasses}
                     disabled={calculating}
                   >
                     {modelOptions.map((id: string) => (
@@ -250,12 +250,12 @@ export function RentalCalculator() {
                   </select>
                 </div>
 
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
+                <label className={checkboxLabelClasses}>
                   <input
                     type="checkbox"
                     checked={formData.cancellationWaiver}
                     onChange={(e) => updateField('cancellationWaiver', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    className={checkboxClasses}
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
@@ -263,12 +263,12 @@ export function RentalCalculator() {
                   </span>
                 </label>
 
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
+                <label className={checkboxLabelClasses}>
                   <input
                     type="checkbox"
                     checked={formData.windshieldCoverage}
                     onChange={(e) => updateField('windshieldCoverage', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    className={checkboxClasses}
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
@@ -276,12 +276,12 @@ export function RentalCalculator() {
                   </span>
                 </label>
 
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
+                <label className={checkboxLabelClasses}>
                   <input
                     type="checkbox"
                     checked={formData.kitchenKit}
                     onChange={(e) => updateField('kitchenKit', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    className={checkboxClasses}
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
@@ -292,7 +292,7 @@ export function RentalCalculator() {
                 <div>
                   <label
                     htmlFor="bedding-kit-people"
-                    className="text-xs font-medium text-slate-700"
+                    className={labelClasses}
                   >
                     Bedding Kit ($35/person) <span title="Includes bedding essentials such as sheets, pillows, blankets, and pillowcases.">ℹ️</span>
                   </label>
@@ -304,7 +304,7 @@ export function RentalCalculator() {
                     step={1}
                     value={formData.beddingKitPeople}
                     onChange={(e) => updateField('beddingKitPeople', e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                    className={inputClasses}
                     disabled={calculating}
                   />
                 </div>
@@ -314,7 +314,7 @@ export function RentalCalculator() {
                   <div>
                     <label
                       htmlFor="mileage-type"
-                      className="text-xs font-medium text-slate-700"
+                      className={labelClasses}
                     >
                       Quantity of 1,000km packages ($350 each)
                     </label>
@@ -322,7 +322,7 @@ export function RentalCalculator() {
                       id="mileage-type"
                       value={formData.mileagePackage}
                       onChange={(e) => updateField('mileagePackage', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                      className={inputClasses}
                       disabled={calculating}
                     >
                       <option value="0">0</option>
@@ -340,32 +340,32 @@ export function RentalCalculator() {
 
                 {/* Generator Options */}
                 <fieldset className="space-y-3">
-                  <legend className="text-xs font-medium text-slate-700">
+                  <legend className={labelClasses}>
                     Generator options
                   </legend>
                   <div className="space-y-2">
-                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
+                    <label className={radioLabelClasses}>
                       <input
                         type="radio"
                         name="generator"
                         value="none"
                         checked={formData.generatorType === 'none'}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className="h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        className={checkboxClasses}
                         disabled={calculating}
                       />
                       <span className="text-sm font-medium text-slate-800">
                         None ($0)
                       </span>
                     </label>
-                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
+                    <label className={radioLabelClasses}>
                       <input
                         type="radio"
                         name="generator"
                         value="dailyUnlimited"
                         checked={formData.generatorType === 'dailyUnlimited'}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className="h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        className={checkboxClasses}
                         disabled={calculating}
                       />
                       <span className="text-sm font-medium text-slate-800">
@@ -380,7 +380,7 @@ export function RentalCalculator() {
 
                 {calcError ? (
                   <p
-                    className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 ring-1 ring-red-200"
+                    className={errorClasses}
                     role="alert"
                   >
                     {calcError}
@@ -390,7 +390,7 @@ export function RentalCalculator() {
                 <button
                   type="submit"
                   disabled={calculating}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className={`${buttonClasses} w-full`}
                 >
                   {calculating ? (
                     <>
