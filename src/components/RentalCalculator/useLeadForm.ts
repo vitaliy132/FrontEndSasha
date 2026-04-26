@@ -4,6 +4,7 @@ export interface LeadFormData {
   name: string
   email: string
   phone: string
+  address: string
 }
 
 export function useLeadForm() {
@@ -11,6 +12,7 @@ export function useLeadForm() {
     name: '',
     email: '',
     phone: '',
+    address: '',
   })
 
   const updateField = (field: keyof LeadFormData, value: string) => {
@@ -18,7 +20,7 @@ export function useLeadForm() {
   }
 
   const reset = () => {
-    setFormData({ name: '', email: '', phone: '' })
+    setFormData({ name: '', email: '', phone: '', address: '' })
   }
 
   return {

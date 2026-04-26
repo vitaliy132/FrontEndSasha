@@ -58,5 +58,6 @@ export interface SubmitLeadRequest {
   name: string
   email: string
   phone: string
+  address: string
   quote: string
 }

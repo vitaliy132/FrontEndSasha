@@ -2,7 +2,7 @@ export function formatModelLabel(id: string): string {
   const parts = id.split('_')
   if (parts.length < 2) return id.replaceAll('_', ' ')
 
-  const size = parts[0]
+  const size = parts[0].replace('ft', '') // Remove 'ft' from size
   const hasSlideOut = parts.includes('slide') && parts.includes('out')
   const isEconomy = parts.includes('economy')
   const yearParts = parts.filter(p => /^\d{4}$/.test(p))

@@ -19,7 +19,6 @@ export interface RentalFormData {
   mileagePerKm: string
   kitchenKit: boolean
   beddingKitPeople: string
-  bikeRack: boolean
 }
 
 export function useRentalForm() {
@@ -38,11 +37,10 @@ export function useRentalForm() {
     windshieldCoverage: initial.windshieldCoverage,
     generatorType: initial.generatorDailyUnlimited ? 'dailyUnlimited' : (initial.generatorHours > 0 ? 'hourly' : 'none'),
     generatorHours: String(initial.generatorHours),
-    mileagePackage: '1000',
+    mileagePackage: '0',
     mileagePerKm: String(initial.extraKm || ''),
     kitchenKit: initial.kitchenKit,
     beddingKitPeople: String(initial.beddingKitPeople),
-    bikeRack: initial.bikeRack,
   })
 
   const modelOptions = useMemo(

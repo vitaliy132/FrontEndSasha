@@ -25,6 +25,7 @@ export function validateLeadForm(input: {
   name: string
   email: string
   phone: string
+  address: string
   userId: string | null
 }): string | null {
   if (!input.name.trim()) return 'Please enter your name.'
@@ -34,5 +35,6 @@ export function validateLeadForm(input: {
   if (!input.email.trim()) return 'Please enter your email.'
   if (!EMAIL_RE.test(input.email.trim())) return 'Please enter a valid email.'
   if (!input.phone.trim()) return 'Please enter your phone number.'
+  if (!input.address.trim()) return 'Please enter your address.'
   return null
 }

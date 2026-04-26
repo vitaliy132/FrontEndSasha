@@ -31,7 +31,6 @@ export function RentalCalculator() {
 
     const generatorHoursNum = Number(formData.generatorHours)
     const beddingKitPeopleNum = Number(formData.beddingKitPeople)
-    const mileagePerKmNum = Number(formData.mileagePerKm)
 
     const validationError = validateRentalForm({
       startDate: formData.startDate,
@@ -44,17 +43,27 @@ export function RentalCalculator() {
       return
     }
 
+    // Calculate selected days and enforce minimum 5 days
+    const start = new Date(formData.startDate)
+    const end = new Date(formData.endDate)
+    const selectedDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1 // inclusive days
+    const chargedDays = Math.max(selectedDays, 5)
+
+    // Adjust endDate if necessary to ensure at least 5 days
+    const adjustedEndDate = new Date(start)
+    adjustedEndDate.setDate(start.getDate() + chargedDays - 1) // -1 because inclusive
+
     setCalculating(true)
     try {
       // Convert new form fields to API fields
-      const kmPackagesNum = formData.mileagePackage !== 'perKm' ? Number(formData.mileagePackage) / 1000 : 0
-      const extraKmNum = formData.mileagePackage === 'perKm' ? mileagePerKmNum : 0
+      const kmPackagesNum = Number(formData.mileagePackage)
+      const extraKmNum = 0
       const generatorDailyUnlimited = formData.generatorType === 'dailyUnlimited'
       const generatorHours = formData.generatorType === 'hourly' ? generatorHoursNum : 0
 
       const data = await calculateRental({
         startDate: formData.startDate,
-        endDate: formData.endDate,
+        endDate: adjustedEndDate.toISOString().split('T')[0], // Use adjusted end date
         vehicleType: formData.vehicleType,
         vehicleModel: formData.vehicleModel,
         cancellationWaiver: formData.cancellationWaiver,
@@ -65,7 +74,7 @@ export function RentalCalculator() {
         generatorHours,
         kitchenKit: formData.kitchenKit,
         beddingKitPeople: beddingKitPeopleNum,
-        bikeRack: formData.bikeRack,
+        bikeRack: false,
       })
       setResult(data)
     } catch (err) {
@@ -91,6 +100,7 @@ export function RentalCalculator() {
       name: leadFormData.name,
       email: leadFormData.email,
       phone: leadFormData.phone,
+      address: leadFormData.address,
       userId,
     })
     if (err) {
@@ -105,6 +115,7 @@ export function RentalCalculator() {
         name: leadFormData.name.trim(),
         email: leadFormData.email.trim(),
         phone: leadFormData.phone.trim(),
+        address: leadFormData.address.trim(),
         quote,
       })
       setLeadSuccess(true)
@@ -131,11 +142,10 @@ export function RentalCalculator() {
             Fleet rentals
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Rental calculator
+            Rental Quote Calculator
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 lg:mx-0">
-            Configure your trip, get an instant estimate, and request a booking
-            in one flow.
+            Configure your trip, get an instant quote, and confirm availability.
           </p>
           <p className="mt-3 text-xs text-slate-500">
             API:{' '}
@@ -193,10 +203,7 @@ export function RentalCalculator() {
 
                 <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3">
                   <p className="text-xs font-medium text-amber-900">
-                    ⚠️ Minimum rental duration: 5 days
-                  </p>
-                  <p className="mt-1 text-xs text-amber-800">
-                    Shorter rentals will be charged for 5 days.
+                    Minimum rental price: 5 days, shorter rentals will be charged a 5 day minimum rental price
                   </p>
                 </div>
 
@@ -281,7 +288,7 @@ export function RentalCalculator() {
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
-                    Kitchen Kit ($85/trip)
+                    Kitchen Kit ($85/trip) <span title="Includes cookware, utensils, dishes, cups, and basic kitchen essentials.">ℹ️</span>
                   </span>
                 </label>
 
@@ -290,7 +297,7 @@ export function RentalCalculator() {
                     htmlFor="bedding-kit-people"
                     className="text-xs font-medium text-slate-700"
                   >
-                    Bedding Kit ($35/person)
+                    Bedding Kit ($35/person) <span title="Includes bedding essentials such as sheets, pillows, blankets, and pillowcases.">ℹ️</span>
                   </label>
                   <input
                     id="bedding-kit-people"
@@ -305,26 +312,13 @@ export function RentalCalculator() {
                   />
                 </div>
 
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-3">
-                  <input
-                    type="checkbox"
-                    checked={formData.bikeRack}
-                    onChange={(e) => updateField('bikeRack', e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    disabled={calculating}
-                  />
-                  <span className="text-sm font-medium text-slate-800">
-                    Bike Rack
-                  </span>
-                </label>
-
                 {/* Mileage Options */}
                 <div>
                   <label
                     htmlFor="mileage-type"
                     className="text-xs font-medium text-slate-700"
                   >
-                    Mileage options
+                    Quantity of 1,000km packages ($350 each)
                   </label>
                   <select
                     id="mileage-type"
@@ -333,38 +327,17 @@ export function RentalCalculator() {
                     className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     disabled={calculating}
                   >
-                    <option value="100">100 km ($39)</option>
-                    <option value="1000">1000 km ($350)</option>
-                    <option value="2000">2000 km ($700)</option>
-                    <option value="3000">3000 km ($1050)</option>
-                    <option value="4000">4000 km ($1400)</option>
-                    <option value="5000">5000 km ($1750)</option>
-                    <option value="perKm">Pay per km ($0.41/km)</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
                   </select>
+                  <p className="mt-1 text-xs text-slate-600">
+                    Additional kms are $0.41 per km, charged at drop off
+                  </p>
                 </div>
-
-                {formData.mileagePackage === 'perKm' && (
-                  <div>
-                    <label
-                      htmlFor="mileage-per-km"
-                      className="text-xs font-medium text-slate-700"
-                    >
-                      Actual kilometers driven
-                    </label>
-                    <input
-                      id="mileage-per-km"
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      step={1}
-                      value={formData.mileagePerKm}
-                      onChange={(e) => updateField('mileagePerKm', e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                      placeholder="Enter total kilometers"
-                      disabled={calculating}
-                    />
-                  </div>
-                )}
 
                 {/* Generator Options */}
                 <fieldset className="space-y-3">
@@ -397,7 +370,7 @@ export function RentalCalculator() {
                         disabled={calculating}
                       />
                       <span className="text-sm font-medium text-slate-800">
-                        Hourly ($5/hour)
+                        Hourly
                       </span>
                     </label>
                     {formData.generatorType === 'hourly' && (
@@ -431,6 +404,9 @@ export function RentalCalculator() {
                     </label>
                   </div>
                 </fieldset>
+                <p className="text-xs text-slate-600">
+                  Generator is charged upon drop off at $5 per hour of use.
+                </p>
 
                 {calcError ? (
                   <p
@@ -452,7 +428,7 @@ export function RentalCalculator() {
                       Calculating…
                     </>
                   ) : (
-                    'Calculate estimate'
+                    'Calculate Rental Price'
                   )}
                 </button>
               </form>
@@ -474,7 +450,7 @@ export function RentalCalculator() {
                     <p className="text-sm text-slate-500">
                       No estimate yet. Fill the form and click{' '}
                       <span className="font-medium text-slate-700">
-                        Calculate estimate
+                        Calculate Rental Price
                       </span>
                       .
                     </p>
@@ -496,14 +472,14 @@ export function RentalCalculator() {
                 {result && !calculating ? (
                   <div className="mt-6">
                     <div className="rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
-                      <p className="text-xs font-medium uppercase tracking-wider text-white/70">
-                        Total
+                      <p className="text-sm leading-relaxed text-white/85">
+                        Your estimated price for this rental is {result.totalFormatted}.
                       </p>
-                      <p className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                        {result.totalFormatted}
+                      <p className="mt-2 text-sm leading-relaxed text-white/85">
+                        This includes the daily rental rate, CDW Plus (Collision Damage Waiver), preparation fee, kilometer packages where applicable, taxes, a full tank of propane, and a full demonstration of the vehicle, as listed in the breakdown below.
                       </p>
-                      <p className="mt-4 text-sm leading-relaxed text-white/85">
-                        {result.summaryMessage}
+                      <p className="mt-2 text-sm leading-relaxed text-white/85">
+                        A $3000 security deposit is required at pickup.
                       </p>
                     </div>
 
@@ -519,7 +495,7 @@ export function RentalCalculator() {
                         }}
                         className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:bg-emerald-50"
                       >
-                        Request booking
+                        Confirm Availability
                       </button>
                     </div>
                   </div>
@@ -531,6 +507,7 @@ export function RentalCalculator() {
                   name={leadFormData.name}
                   email={leadFormData.email}
                   phone={leadFormData.phone}
+                  address={leadFormData.address}
                   onChange={updateLeadField}
                   onSubmit={handleLeadSubmit}
                   loading={leadLoading}

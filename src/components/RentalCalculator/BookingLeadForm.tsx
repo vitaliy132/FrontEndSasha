@@ -5,7 +5,8 @@ export interface BookingLeadFormProps {
   name: string
   email: string
   phone: string
-  onChange: (field: 'name' | 'email' | 'phone', value: string) => void
+  address: string
+  onChange: (field: 'name' | 'email' | 'phone' | 'address', value: string) => void
   onSubmit: (e: FormEvent) => void
   loading: boolean
   error: string | null
@@ -17,6 +18,7 @@ export function BookingLeadForm({
   name,
   email,
   phone,
+  address,
   onChange,
   onSubmit,
   loading,
@@ -52,7 +54,7 @@ export function BookingLeadForm({
           role="status"
         >
           <p className="font-medium">Thank you! Your request has been received.</p>
-          <p className="mt-1">Our team will contact you shortly to confirm availability.</p>
+          <p className="mt-1">An RV Specialist will be in touch to confirm availability and complete the Rental Reservation with you.</p>
         </div>
       ) : (
         <form onSubmit={onSubmit} className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -110,6 +112,25 @@ export function BookingLeadForm({
               onChange={(e) => onChange('phone', e.target.value)}
               className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               placeholder="+1 …"
+              disabled={loading}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="lead-address"
+              className="text-xs font-medium text-slate-700"
+            >
+              Address
+            </label>
+            <input
+              id="lead-address"
+              name="address"
+              type="text"
+              autoComplete="address"
+              value={address}
+              onChange={(e) => onChange('address', e.target.value)}
+              className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              placeholder="123 Main St, City, State, ZIP"
               disabled={loading}
             />
           </div>
