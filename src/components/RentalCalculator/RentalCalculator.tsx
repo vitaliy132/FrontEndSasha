@@ -55,7 +55,7 @@ export function RentalCalculator() {
     setCalculating(true)
     try {
       // Convert new form fields to API fields
-      const kmPackagesNum = Number(formData.mileagePackage)
+      const kmPackagesNum = formData.vehicleType === 'trailer' ? 0 : Number(formData.mileagePackage)
       const extraKmNum = 0
       const generatorDailyUnlimited = formData.generatorType === 'dailyUnlimited'
 
@@ -310,31 +310,33 @@ export function RentalCalculator() {
                 </div>
 
                 {/* Mileage Options */}
-                <div>
-                  <label
-                    htmlFor="mileage-type"
-                    className="text-xs font-medium text-slate-700"
-                  >
-                    Quantity of 1,000km packages ($350 each)
-                  </label>
-                  <select
-                    id="mileage-type"
-                    value={formData.mileagePackage}
-                    onChange={(e) => updateField('mileagePackage', e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    disabled={calculating}
-                  >
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                  </select>
-                  <p className="mt-1 text-xs text-slate-600">
-                    Additional kms are $0.41 per km, charged at drop off
-                  </p>
-                </div>
+                {formData.vehicleType !== 'trailer' && (
+                  <div>
+                    <label
+                      htmlFor="mileage-type"
+                      className="text-xs font-medium text-slate-700"
+                    >
+                      Quantity of 1,000km packages ($350 each)
+                    </label>
+                    <select
+                      id="mileage-type"
+                      value={formData.mileagePackage}
+                      onChange={(e) => updateField('mileagePackage', e.target.value)}
+                      className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                      disabled={calculating}
+                    >
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                    <p className="mt-1 text-xs text-slate-600">
+                      Additional kms are $0.41 per km, charged at drop off
+                    </p>
+                  </div>
+                )}
 
                 {/* Generator Options */}
                 <fieldset className="space-y-3">

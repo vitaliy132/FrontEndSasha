@@ -59,6 +59,7 @@ export function useRentalForm() {
       ...prev,
       vehicleType,
       vehicleModel: defaultModel,
+      mileagePackage: vehicleType === 'trailer' ? '0' : prev.mileagePackage,
     }))
   }
 
