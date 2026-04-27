@@ -447,7 +447,7 @@ export function RentalCalculator() {
                       </p>
                     </div>
 
-                    <BreakdownList breakdown={result.breakdown} />
+                    <BreakdownList breakdown={result.breakdown} totalFormatted={result.totalFormatted} />
 
                     <div className="mt-6 flex flex-wrap gap-3">
                       <button

@@ -33,7 +33,7 @@ function formatCurrency(value: number): string {
   return `$${value.toFixed(2)}`
 }
 
-export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
+export function BreakdownList({ breakdown, totalFormatted }: { breakdown: Breakdown, totalFormatted?: string }) {
   if (!breakdown) return null
 
   if (Array.isArray(breakdown)) {
@@ -55,6 +55,14 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
               </span>
             </li>
           ))}
+          {totalFormatted && !breakdown.some(line => line.label.toLowerCase().includes('total')) && (
+            <li className="flex items-start justify-between gap-4 border-t border-slate-200 pt-2 text-lg font-bold text-slate-900">
+              <span className="text-slate-700">Total</span>
+              <span className="shrink-0 tabular-nums">
+                {totalFormatted}
+              </span>
+            </li>
+          )}
         </ul>
       </div>
     )
@@ -144,6 +152,14 @@ export function BreakdownList({ breakdown }: { breakdown: Breakdown }) {
                 {formatCurrency(breakdown_.tax)}
               </span>
             </li>
+            {totalFormatted && (
+              <li className="flex items-start justify-between gap-4 border-t border-slate-200 pt-2 text-lg font-bold text-slate-900">
+                <span className="text-slate-700">Total</span>
+                <span className="shrink-0 tabular-nums">
+                  {totalFormatted}
+                </span>
+              </li>
+            )}
           </>
         )}
       </ul>
