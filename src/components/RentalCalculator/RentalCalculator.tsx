@@ -294,7 +294,7 @@ export function RentalCalculator() {
                       onMouseLeave={() => setShowKitchenTooltip(false)}
                     >ℹ️</span>
                     {showKitchenTooltip && (
-                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-slate-800 p-3 text-sm text-white shadow-lg">
+                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-white p-3 text-sm text-slate-900 shadow-lg border border-slate-200">
                         <ul className="space-y-1">
                           <li>Toaster</li>
                           <li>Pots with lids</li>
@@ -327,7 +327,7 @@ export function RentalCalculator() {
                       onMouseLeave={() => setShowBeddingTooltip(false)}
                     >ℹ️</span>
                     {showBeddingTooltip && (
-                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-slate-800 p-3 text-sm text-white shadow-lg">
+                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-white p-3 text-sm text-slate-900 shadow-lg border border-slate-200">
                         <ul className="space-y-1">
                           <li>Blanket</li>
                           <li>Bottom sheet</li>
