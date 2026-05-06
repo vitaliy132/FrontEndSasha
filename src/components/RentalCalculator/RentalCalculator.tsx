@@ -294,7 +294,7 @@ export function RentalCalculator() {
                     htmlFor="bedding-kit-people"
                     className={labelClasses}
                   >
-                    Bedding Kit ($35/person) <span title="Includes bedding essentials such as sheets, pillows, blankets, and pillowcases.">ℹ️</span>
+                    Bedding Kit ($35/person) <span title="Blanket\nBottom sheet\nTop sheet\nPillow + pillowcase\nFace cloth\nHand towel\nBath towel\nHanger">ℹ️</span>
                   </label>
                   <input
                     id="bedding-kit-people"
