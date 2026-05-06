@@ -187,6 +187,7 @@
   cursor: help;
   transition: transform 0.2s, opacity 0.2s;
   display: inline-block;
+  position: relative;
 
   &:hover {
     transform: scale(1.2);
