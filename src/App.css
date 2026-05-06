@@ -182,3 +182,14 @@
     border-right-color: var(--border);
   }
 }
+
+.info-icon {
+  cursor: help;
+  transition: transform 0.2s, opacity 0.2s;
+  display: inline-block;
+
+  &:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}

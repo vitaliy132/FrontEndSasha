@@ -285,7 +285,7 @@ export function RentalCalculator() {
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
-                    Kitchen Kit ($85/trip) <span title="Includes cookware, utensils, dishes, cups, and basic kitchen essentials.">ℹ️</span>
+                    Kitchen Kit ($85/trip) <span className="info-icon" title="Includes cookware, utensils, dishes, cups, and basic kitchen essentials.">ℹ️</span>
                   </span>
                 </label>
 
