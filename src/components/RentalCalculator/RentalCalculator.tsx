@@ -285,7 +285,20 @@ export function RentalCalculator() {
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
-                    Kitchen Kit ($85/trip) <span className="info-icon" title="Includes cookware, utensils, dishes, cups, and basic kitchen essentials.">ℹ️</span>
+                    Kitchen Kit ($85/trip) <span className="info-icon" title="Toaster
+Pots with lids
+Frying pan
+Kettle
+Coffee / tea pot
+Carving knife
+Tongs
+Oven mitts
+Salt & pepper shakers
+Mixing bowls
+Measuring cups
+Wooden spoons
+Tea towels
+Dish cloths">ℹ️</span>
                   </span>
                 </label>
 
@@ -294,7 +307,14 @@ export function RentalCalculator() {
                     htmlFor="bedding-kit-people"
                     className={labelClasses}
                   >
-                    Bedding Kit ($35/person) <span title="Blanket\nBottom sheet\nTop sheet\nPillow + pillowcase\nFace cloth\nHand towel\nBath towel\nHanger">ℹ️</span>
+                    Bedding Kit ($35/person) <span className="info-icon" title="Blanket
+Bottom sheet
+Top sheet
+Pillow + pillowcase
+Face cloth
+Hand towel
+Bath towel
+Hanger">ℹ️</span>
                   </label>
                   <input
                     id="bedding-kit-people"
