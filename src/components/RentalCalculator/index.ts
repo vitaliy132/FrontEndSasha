@@ -1,5 +1,4 @@
 export { RentalCalculator } from './RentalCalculator'
 export { useRentalForm } from './useRentalForm'
 export { useLeadForm } from './useLeadForm'
-export { Tooltip } from './Tooltip'
 export { formatModelLabel, inputClasses, labelClasses, checkboxClasses, checkboxLabelClasses, radioLabelClasses, buttonClasses, errorClasses } from './utils'
