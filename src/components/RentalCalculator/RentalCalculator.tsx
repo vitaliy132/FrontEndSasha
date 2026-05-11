@@ -146,6 +146,22 @@ export function RentalCalculator() {
           <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 lg:mx-0">
             Configure your trip, get an instant quote, and confirm availability.
           </p>
+          <div className="mx-auto mt-5 max-w-2xl rounded-xl border border-slate-200/80 bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-slate-900/5 backdrop-blur sm:px-5 lg:mx-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Pick Up/Drop Off Location
+            </p>
+            <address className="mt-2 block text-sm not-italic leading-relaxed text-slate-700">
+              4888 South Service Rd
+              <br />
+              Beamsville, ON L3J 1L4
+            </address>
+            <a
+              href="tel:905-548-8585"
+              className="mt-2 inline-block text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+            >
+              905-548-8585
+            </a>
+          </div>
           <p className="mt-3 text-xs text-slate-500">
             API:{' '}
             <code className="rounded bg-slate-200/60 px-1.5 py-0.5 font-mono text-slate-700">
@@ -552,7 +568,23 @@ export function RentalCalculator() {
           <section className="mt-12 border-t border-slate-200 pt-8 lg:col-span-12">
             <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-lg shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur sm:p-8">
               <h2 className="text-lg font-semibold text-slate-900">Contact Us</h2>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+              <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Pick Up/Drop Off Location
+                </p>
+                <address className="mt-2 block text-sm not-italic leading-relaxed text-slate-700">
+                  4888 South Service Rd
+                  <br />
+                  Beamsville, ON L3J 1L4
+                </address>
+                <a
+                  href="tel:905-548-8585"
+                  className="mt-3 inline-block text-base font-semibold text-emerald-600 hover:text-emerald-700"
+                >
+                  905-548-8585
+                </a>
+              </div>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
                 <div className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Toll free
