@@ -1,6 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useState } from 'react'
-import { getApiBase, submitLead, calculateRental } from '../../lib/api'
+import { submitLead, calculateRental } from '../../lib/api'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
@@ -13,8 +13,6 @@ import { Spinner } from './Spinner'
 export function RentalCalculator() {
   const { formData, modelOptions, updateField, updateVehicleType, userId } = useRentalForm()
   const { formData: leadFormData, updateField: updateLeadField } = useLeadForm()
-
-  const apiBase = getApiBase()
 
   const [calculating, setCalculating] = useState(false)
   const [calcError, setCalcError] = useState<string | null>(null)
@@ -145,28 +143,6 @@ export function RentalCalculator() {
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 lg:mx-0">
             Configure your trip, get an instant quote, and confirm availability.
-          </p>
-          <div className="mx-auto mt-5 max-w-2xl rounded-xl border border-slate-200/80 bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-slate-900/5 backdrop-blur sm:px-5 lg:mx-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Pick Up/Drop Off Location
-            </p>
-            <address className="mt-2 block text-sm not-italic leading-relaxed text-slate-700">
-              4888 South Service Rd
-              <br />
-              Beamsville, ON L3J 1L4
-            </address>
-            <a
-              href="tel:905-548-8585"
-              className="mt-2 inline-block text-sm font-semibold text-emerald-600 hover:text-emerald-700"
-            >
-              905-548-8585
-            </a>
-          </div>
-          <p className="mt-3 text-xs text-slate-500">
-            API:{' '}
-            <code className="rounded bg-slate-200/60 px-1.5 py-0.5 font-mono text-slate-700">
-              {apiBase}
-            </code>
           </p>
         </header>
 
