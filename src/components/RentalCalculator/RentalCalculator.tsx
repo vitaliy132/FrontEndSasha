@@ -36,9 +36,16 @@ export function RentalCalculator() {
     return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
   })()
 
+  const tooShortRental = selectedDays !== null && selectedDays < 5
+
   async function handleCalculate(e: FormEvent) {
     e.preventDefault()
     setCalcError(null)
+
+    if (tooShortRental) {
+      setCalcError('Minimum rental period is 5 days. Please pick a longer date range.')
+      return
+    }
 
     const beddingKitPeopleNum = Number(formData.beddingKitPeople)
 
@@ -192,10 +199,10 @@ export function RentalCalculator() {
                   </div>
                 </div>
 
-                {selectedDays !== null && selectedDays < 5 ? (
+                {tooShortRental ? (
                   <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3">
                     <p className="text-xs font-medium text-amber-900">
-                      Minimum rental price: 5 days, shorter rentals will be charged a 5 day minimum rental price
+                      Minimum rental period is 5 days. Please pick a longer date range to continue.
                     </p>
                   </div>
                 ) : null}
@@ -441,8 +448,10 @@ export function RentalCalculator() {
 
                 <button
                   type="submit"
-                  disabled={calculating}
-                  className={`${buttonClasses} w-full`}
+                  disabled={calculating || tooShortRental}
+                  aria-disabled={calculating || tooShortRental}
+                  title={tooShortRental ? 'Minimum rental period is 5 days' : undefined}
+                  className={`${buttonClasses} w-full disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   {calculating ? (
                     <>
