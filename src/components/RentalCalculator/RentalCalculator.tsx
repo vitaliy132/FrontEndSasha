@@ -6,9 +6,11 @@ import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
+import { Tooltip } from './Tooltip'
 import { formatModelLabel, useLeadForm, useRentalForm, inputClasses, labelClasses, checkboxClasses, checkboxLabelClasses, radioLabelClasses, buttonClasses, errorClasses } from './index'
 import { Spinner } from './Spinner'
 
+type TooltipKey = 'kitchen' | 'bedding' | 'cancellation'
 
 export function RentalCalculator() {
   const { formData, modelOptions, updateField, updateVehicleType, userId } = useRentalForm()
@@ -25,8 +27,15 @@ export function RentalCalculator() {
   const [leadError, setLeadError] = useState<string | null>(null)
   const [leadSuccess, setLeadSuccess] = useState(false)
 
-  const [showKitchenTooltip, setShowKitchenTooltip] = useState(false)
-  const [showBeddingTooltip, setShowBeddingTooltip] = useState(false)
+  const [visibleTooltips, setVisibleTooltips] = useState<Record<TooltipKey, boolean>>({
+    kitchen: false,
+    bedding: false,
+    cancellation: false,
+  })
+
+  const toggleTooltip = (key: TooltipKey) => {
+    setVisibleTooltips(prev => ({ ...prev, [key]: !prev[key] }))
+  }
 
   const selectedDays = (() => {
     if (!formData.startDate || !formData.endDate) return null
@@ -263,6 +272,23 @@ export function RentalCalculator() {
                   />
                   <span className="text-sm font-medium text-slate-800">
                     Cancellation waiver ($20/day, min $240)
+                    {' '}
+                    <Tooltip
+                      trigger={<span className="info-icon">ℹ️</span>}
+                      content={
+                        <>
+                          <p className="mb-2 font-medium">Protection against cancellation losses:</p>
+                          <ul className="space-y-1">
+                            <li>• Full refund if you cancel up to 7 days before rental start</li>
+                            <li>• 50% refund if you cancel 3-6 days before rental start</li>
+                            <li>• No refund if you cancel less than 3 days before rental start</li>
+                          </ul>
+                        </>
+                      }
+                      visible={visibleTooltips.cancellation}
+                      onMouseEnter={() => toggleTooltip('cancellation')}
+                      onMouseLeave={() => setVisibleTooltips(prev => ({ ...prev, cancellation: false }))}
+                    />
                   </span>
                 </label>
 
@@ -288,13 +314,11 @@ export function RentalCalculator() {
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
-                    Kitchen Kit ($85/trip) <span 
-                      className="info-icon" 
-                      onMouseEnter={() => setShowKitchenTooltip(true)}
-                      onMouseLeave={() => setShowKitchenTooltip(false)}
-                    >ℹ️</span>
-                    {showKitchenTooltip && (
-                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-slate-50 p-3 text-sm text-slate-900 shadow-lg border border-slate-200">
+                    Kitchen Kit ($85/trip)
+                    {' '}
+                    <Tooltip
+                      trigger={<span className="info-icon">ℹ️</span>}
+                      content={
                         <ul className="space-y-1">
                           <li>Toaster</li>
                           <li>Pots with lids</li>
@@ -311,8 +335,11 @@ export function RentalCalculator() {
                           <li>Tea towels</li>
                           <li>Dish cloths</li>
                         </ul>
-                      </div>
-                    )}
+                      }
+                      visible={visibleTooltips.kitchen}
+                      onMouseEnter={() => toggleTooltip('kitchen')}
+                      onMouseLeave={() => setVisibleTooltips(prev => ({ ...prev, kitchen: false }))}
+                    />
                   </span>
                 </label>
 
@@ -321,13 +348,11 @@ export function RentalCalculator() {
                     htmlFor="bedding-kit-people"
                     className={labelClasses}
                   >
-                    Bedding Kit ($35/person) <span 
-                      className="info-icon" 
-                      onMouseEnter={() => setShowBeddingTooltip(true)}
-                      onMouseLeave={() => setShowBeddingTooltip(false)}
-                    >ℹ️</span>
-                    {showBeddingTooltip && (
-                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-slate-50 p-3 text-sm text-slate-900 shadow-lg border border-slate-200">
+                    Personal Kit ($35/person)
+                    {' '}
+                    <Tooltip
+                      trigger={<span className="info-icon">ℹ️</span>}
+                      content={
                         <ul className="space-y-1">
                           <li>Blanket</li>
                           <li>Bottom sheet</li>
@@ -338,8 +363,11 @@ export function RentalCalculator() {
                           <li>Bath towel</li>
                           <li>Hanger</li>
                         </ul>
-                      </div>
-                    )}
+                      }
+                      visible={visibleTooltips.bedding}
+                      onMouseEnter={() => toggleTooltip('bedding')}
+                      onMouseLeave={() => setVisibleTooltips(prev => ({ ...prev, bedding: false }))}
+                    />
                   </label>
                   <input
                     id="bedding-kit-people"
@@ -525,6 +553,32 @@ export function RentalCalculator() {
                   userId={userId}
                 />
               ) : null}
+            </div>
+          </section>
+
+          <section className="mt-12 border-t border-slate-200 pt-8">
+            <div className="mx-auto max-w-2xl">
+              <h2 className="text-lg font-semibold text-slate-900 mb-6">Contact Us</h2>
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-slate-600">Toll Free</p>
+                  <a href="tel:1-888-539-3333" className="text-base font-semibold text-emerald-600 hover:text-emerald-700">
+                    1-888-539-3333
+                  </a>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-slate-600">Call/Text</p>
+                  <a href="tel:905-548-8585" className="text-base font-semibold text-emerald-600 hover:text-emerald-700">
+                    905-548-8585
+                  </a>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-slate-600">Email</p>
+                  <a href="mailto:sales@rvvacations.com" className="text-base font-semibold text-emerald-600 hover:text-emerald-700">
+                    sales@rvvacations.com
+                  </a>
+                </div>
+              </div>
             </div>
           </section>
         </div>

@@ -18,7 +18,7 @@ const BREAKDOWN_LABELS: Record<string, string> = {
   cancellationWaiver: 'Cancellation Waiver',
   windshield: 'Windshield Coverage',
   kitchenKit: 'Kitchen Kit',
-  beddingKit: 'Bedding Kit',
+  beddingKit: 'Personal Kit',
   bikeRack: 'Bike Rack',
   winterization: 'Winterization Fee',
   tax: 'HST (13%)',
@@ -113,7 +113,7 @@ export function BreakdownList({ breakdown, totalFormatted }: { breakdown: Breakd
     entries.push(['kitchenKit', formatCurrency(breakdown_.kitchenKit)])
   }
 
-  // Bedding Kit
+  // Personal Kit
   if (breakdown_.beddingKit > 0) {
     entries.push(['beddingKit', formatCurrency(breakdown_.beddingKit)])
   }
