@@ -248,7 +248,7 @@ export function RentalCalculator() {
                   >
                     {modelOptions.map((id: string) => (
                       <option key={id} value={id}>
-                        {formatModelLabel(id)}
+                        {formatModelLabel(id, formData.vehicleType)}
                       </option>
                     ))}
                   </select>

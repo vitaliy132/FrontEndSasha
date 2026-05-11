@@ -1,25 +1,66 @@
-export function formatModelLabel(id: string): string {
+import type { VehicleType } from '../../types/rental'
+
+/** Upper bound shown for standard (non-economy) fleet model years in the UI. */
+const DISPLAY_CURRENT_YEAR = 2026
+
+const VEHICLE_TYPE_PREFIX: Record<VehicleType, string> = {
+  classA: 'Class A',
+  classB: 'Class B',
+  classC: 'Class C',
+  trailer: 'Trailer',
+}
+
+function isEconomyFleetModel(id: string, parts: string[]): boolean {
+  if (parts.includes('economy')) return true
+  // Class A 32 — 2017 unit; shown as economy fleet (pricing key unchanged).
+  return id === '32ft_2017'
+}
+
+function actualYearRangeLabel(yearParts: string[]): string | null {
+  if (yearParts.length === 0) return null
+  if (yearParts.length === 1) return yearParts[0]
+  const y1 = Number(yearParts[0])
+  const y2 = Number(yearParts[1])
+  const lo = Math.min(y1, y2)
+  const hi = Math.max(y1, y2)
+  return lo === hi ? String(lo) : `${lo}-${hi}`
+}
+
+function standardYearRangeLabel(yearParts: string[]): string | null {
+  if (yearParts.length === 0) return null
+  const startYear =
+    yearParts.length === 1
+      ? Number(yearParts[0])
+      : Math.max(Number(yearParts[0]), Number(yearParts[1]))
+  if (!Number.isFinite(startYear)) return null
+  return `${startYear}-${DISPLAY_CURRENT_YEAR}`
+}
+
+export function formatModelLabel(id: string, vehicleType: VehicleType): string {
   const parts = id.split('_')
   if (parts.length < 2) return id.replaceAll('_', ' ')
 
+  const typePrefix = VEHICLE_TYPE_PREFIX[vehicleType]
   const size = parts[0].replace('ft', '') // Remove 'ft' from size
   const hasSlideOut = parts.includes('slide') && parts.includes('out')
-  const isEconomy = parts.includes('economy')
+  const isEconomy = isEconomyFleetModel(id, parts)
   const yearParts = parts.filter(p => /^\d{4}$/.test(p))
 
-  let label = size
+  let label = `${typePrefix} ${size}`
   if (hasSlideOut) {
     label += ' Slide Out'
   }
   if (isEconomy) {
-    label += ' Economy'
+    label += ' (Economy)'
   }
 
   if (yearParts.length > 0) {
-    if (yearParts.length === 1) {
-      label += ` (${yearParts[0]})`
-    } else if (yearParts.length === 2) {
-      label += ` (${yearParts[0]}–${yearParts[1]})`
+    if (isEconomy) {
+      const actual = actualYearRangeLabel(yearParts)
+      if (actual) label += ` Economy ${actual}`
+    } else {
+      const display = standardYearRangeLabel(yearParts)
+      if (display) label += ` (${display})`
     }
   }
 
