@@ -8,6 +8,28 @@ export function getApiBase(): string {
   return API_BASE || '(same origin / proxy)'
 }
 
+async function buildErrorMessage(res: Response, isJson: boolean): Promise<string> {
+  let errorMessage = `Request failed (${res.status})`
+
+  if (isJson) {
+    try {
+      const errorData = await res.json() as { error?: string; message?: string }
+      return errorData.message || errorData.error || errorMessage
+    } catch {
+      // Fall through to text fallback
+    }
+  }
+
+  try {
+    const text = await res.text()
+    errorMessage = text || errorMessage
+  } catch {
+    // Keep default status-based message
+  }
+
+  return errorMessage
+}
+
 export async function calculateRental(body: RentalCalculateRequest): Promise<RentalCalculateResponse> {
   const url = `${API_BASE}/calculate-rental`
   console.log('API Request:', { url, body })
@@ -24,28 +46,7 @@ export async function calculateRental(body: RentalCalculateRequest): Promise<Ren
   const isJson = contentType?.includes('application/json')
 
   if (!res.ok) {
-    let errorMessage = `Request failed (${res.status})`
-    if (isJson) {
-      try {
-        const errorData = await res.json() as { error?: string; message?: string }
-        errorMessage = errorData.message || errorData.error || errorMessage
-      } catch {
-        // If JSON parsing fails, try to get text
-        try {
-          const text = await res.text()
-          errorMessage = text || errorMessage
-        } catch {
-          // Fallback to status code message
-        }
-      }
-    } else {
-      try {
-        const text = await res.text()
-        errorMessage = text || errorMessage
-      } catch {
-        // Fallback to status code message
-      }
-    }
+    const errorMessage = await buildErrorMessage(res, !!isJson)
     console.error('API Error:', errorMessage)
     throw new Error(errorMessage)
   }
@@ -86,28 +87,7 @@ export async function submitLead(body: SubmitLeadRequest): Promise<void> {
   const isJson = contentType?.includes('application/json')
 
   if (!res.ok) {
-    let errorMessage = `Request failed (${res.status})`
-    if (isJson) {
-      try {
-        const errorData = await res.json() as { error?: string; message?: string }
-        errorMessage = errorData.message || errorData.error || errorMessage
-      } catch {
-        // If JSON parsing fails, try to get text
-        try {
-          const text = await res.text()
-          errorMessage = text || errorMessage
-        } catch {
-          // Fallback to status code message
-        }
-      }
-    } else {
-      try {
-        const text = await res.text()
-        errorMessage = text || errorMessage
-      } catch {
-        // Fallback to status code message
-      }
-    }
+    const errorMessage = await buildErrorMessage(res, !!isJson)
     throw new Error(errorMessage)
   }
 }
