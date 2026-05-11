@@ -543,25 +543,40 @@ export function RentalCalculator() {
             </div>
           </section>
 
-          <section className="mt-12 border-t border-slate-200 pt-8">
-            <div className="mx-auto max-w-2xl">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6">Contact Us</h2>
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-slate-600">Toll Free</p>
-                  <a href="tel:1-888-539-3333" className="text-base font-semibold text-emerald-600 hover:text-emerald-700">
+          <section className="mt-12 border-t border-slate-200 pt-8 lg:col-span-12">
+            <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-lg shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur sm:p-8">
+              <h2 className="text-lg font-semibold text-slate-900">Contact Us</h2>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+                <div className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Toll free
+                  </p>
+                  <a
+                    href="tel:1-888-539-3333"
+                    className="mt-2 block text-base font-semibold text-emerald-600 hover:text-emerald-700"
+                  >
                     1-888-539-3333
                   </a>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-slate-600">Call/Text</p>
-                  <a href="tel:905-548-8585" className="text-base font-semibold text-emerald-600 hover:text-emerald-700">
+                <div className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Call / text
+                  </p>
+                  <a
+                    href="tel:905-548-8585"
+                    className="mt-2 block text-base font-semibold text-emerald-600 hover:text-emerald-700"
+                  >
                     905-548-8585
                   </a>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-slate-600">Email</p>
-                  <a href="mailto:sales@rvvacations.com" className="text-base font-semibold text-emerald-600 hover:text-emerald-700">
+                <div className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 sm:col-span-2 lg:col-span-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Email
+                  </p>
+                  <a
+                    href="mailto:sales@rvvacations.com"
+                    className="mt-2 block break-words text-base font-semibold text-emerald-600 hover:text-emerald-700"
+                  >
                     sales@rvvacations.com
                   </a>
                 </div>
