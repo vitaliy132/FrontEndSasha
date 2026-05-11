@@ -509,6 +509,12 @@ export function RentalCalculator() {
 
                     <BreakdownList breakdown={result.breakdown} totalFormatted={result.totalFormatted} />
 
+                    <p className="mt-6 rounded-lg border border-slate-200 bg-slate-50/90 px-3 py-3 text-xs leading-relaxed text-slate-600">
+                      Making a reservation request will only notify us of the request and is not a
+                      guarantee that the vehicle will be reserved. If you do not hear from us within
+                      24 hours, please contact us directly to confirm your reservation.
+                    </p>
+
                     <div className="mt-6 flex flex-wrap gap-3">
                       <button
                         type="button"
