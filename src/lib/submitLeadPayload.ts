@@ -32,7 +32,7 @@ function isQuoteBreakdownObject(
     !!b &&
     typeof b === 'object' &&
     !Array.isArray(b) &&
-    'days' in (b as Record<string, unknown>)
+    'days' in (b as unknown as Record<string, unknown>)
   )
 }
 
