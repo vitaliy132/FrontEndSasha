@@ -1,8 +1,5 @@
 import type { VehicleType } from '../../types/rental'
 
-/** Upper bound shown for standard (non-economy) fleet model years in the UI. */
-const DISPLAY_CURRENT_YEAR = 2026
-
 const VEHICLE_TYPE_PREFIX: Record<VehicleType, string> = {
   classA: 'Class A',
   classB: 'Class B',
@@ -10,61 +7,33 @@ const VEHICLE_TYPE_PREFIX: Record<VehicleType, string> = {
   trailer: 'Trailer',
 }
 
-function isEconomyFleetModel(id: string, parts: string[]): boolean {
-  if (parts.includes('economy')) return true
-  // Class A 32 — 2017 unit; shown as economy fleet (pricing key unchanged).
-  return id === '32ft_2017'
-}
-
-function actualYearRangeLabel(yearParts: string[]): string | null {
-  if (yearParts.length === 0) return null
-  if (yearParts.length === 1) return yearParts[0]
-  const y1 = Number(yearParts[0])
-  const y2 = Number(yearParts[1])
-  const lo = Math.min(y1, y2)
-  const hi = Math.max(y1, y2)
-  return lo === hi ? String(lo) : `${lo}-${hi}`
-}
-
-function standardYearRangeLabel(yearParts: string[]): string | null {
-  if (yearParts.length === 0) return null
-  const startYear =
-    yearParts.length === 1
-      ? Number(yearParts[0])
-      : Math.max(Number(yearParts[0]), Number(yearParts[1]))
-  if (!Number.isFinite(startYear)) return null
-  return `${startYear}-${DISPLAY_CURRENT_YEAR}`
+/**
+ * Display labels aligned with operator rate sheet (internal model keys unchanged).
+ */
+const MODEL_OPTION_LABEL: Record<string, string> = {
+  '30ft_2024': '30 with slide out — 2024-2026',
+  '32ft_2017': '32 with slide out/bunks (Economy) — 2017',
+  '34ft_2023': '34 with slide out — 2023-2026',
+  '35ft_2025': '35 with slide out/bunks — 2025-2026',
+  '36ft_2025': '36 with slide out/bunks — 2025-2026',
+  '31ft_slideout_bunks_2019': '31 with slide out/bunks — 2019-2026',
+  '25ft_slideout_2021_2023': '25 with slide out — 2021-2026',
+  '25ft_slideout_2018_economy': '25 with slide out (Economy) — 2018',
+  '23ft_2020_2026': '23 — 2020-2026',
+  '23ft_2021_2023': '23 — 2021-2026',
+  '19ft_2023': '19 — 2023-2026',
+  '27ft_bunks_2024': '27 with bunks — 2024-2026',
 }
 
 export function formatModelLabel(id: string, vehicleType: VehicleType): string {
+  const custom = MODEL_OPTION_LABEL[id]
+  if (custom) {
+    return `${VEHICLE_TYPE_PREFIX[vehicleType]} — ${custom}`
+  }
   const parts = id.split('_')
   if (parts.length < 2) return id.replaceAll('_', ' ')
-
-  const typePrefix = VEHICLE_TYPE_PREFIX[vehicleType]
-  const size = parts[0].replace('ft', '') // Remove 'ft' from size
-  const hasSlideOut = parts.includes('slide') && parts.includes('out')
-  const isEconomy = isEconomyFleetModel(id, parts)
-  const yearParts = parts.filter(p => /^\d{4}$/.test(p))
-
-  let label = `${typePrefix} ${size}`
-  if (hasSlideOut) {
-    label += ' Slide Out'
-  }
-  if (isEconomy) {
-    label += ' (Economy)'
-  }
-
-  if (yearParts.length > 0) {
-    if (isEconomy) {
-      const actual = actualYearRangeLabel(yearParts)
-      if (actual) label += ` Economy ${actual}`
-    } else {
-      const display = standardYearRangeLabel(yearParts)
-      if (display) label += ` (${display})`
-    }
-  }
-
-  return label
+  const size = parts[0].replace('ft', '')
+  return `${VEHICLE_TYPE_PREFIX[vehicleType]} ${size}`
 }
 
 // Common CSS classes for form elements
