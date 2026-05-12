@@ -24,6 +24,14 @@ function parseVehicleType(raw: string | null): VehicleType | undefined {
   return VEHICLE_TYPES.includes(normalized) ? normalized : undefined
 }
 
+/** Legacy Class A keys merged into `35_36ft_slideout_bunks_2025` in `rentalPricing.json`. */
+function resolveVehicleModelKey(vehicleType: VehicleType, model: string): string {
+  if (vehicleType === 'classA' && (model === '35ft_2025' || model === '36ft_2025')) {
+    return '35_36ft_slideout_bunks_2025'
+  }
+  return model
+}
+
 function parseNonNegNumber(raw: string | null): number | undefined {
   if (raw === null || raw === '') return undefined
   const n = Number(raw)
@@ -62,8 +70,10 @@ export function readRentalQueryParams(search: string): RentalPrefill {
     'vehicle_model',
     'model',
   )
-  const vehicleModel =
-    vehicleModelRaw?.trim() || defaultVehicleModel(vehicle)
+  const vehicleModel = resolveVehicleModelKey(
+    vehicle,
+    vehicleModelRaw?.trim() || defaultVehicleModel(vehicle),
+  )
   const cancellationWaiver =
     parseBool(
       getParam(params, 'cancellationWaiver', 'cancellation_waiver'),
