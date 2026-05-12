@@ -1,11 +1,5 @@
+import { VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'
 import type { VehicleType } from '../../types/rental'
-
-const VEHICLE_TYPE_PREFIX: Record<VehicleType, string> = {
-  classA: 'Class A',
-  classB: 'Class B',
-  classC: 'Class C',
-  trailer: 'Trailer',
-}
 
 /**
  * Display labels aligned with operator rate sheet (internal model keys unchanged).
@@ -26,14 +20,15 @@ const MODEL_OPTION_LABEL: Record<string, string> = {
 }
 
 export function formatModelLabel(id: string, vehicleType: VehicleType): string {
+  const typeLabel = VEHICLE_TYPE_LABEL[vehicleType]
   const custom = MODEL_OPTION_LABEL[id]
   if (custom) {
-    return `${VEHICLE_TYPE_PREFIX[vehicleType]} — ${custom}`
+    return `${typeLabel} — ${custom}`
   }
   const parts = id.split('_')
   if (parts.length < 2) return id.replaceAll('_', ' ')
   const size = parts[0].replace('ft', '')
-  return `${VEHICLE_TYPE_PREFIX[vehicleType]} ${size}`
+  return `${typeLabel} ${size}`
 }
 
 // Common CSS classes for form elements

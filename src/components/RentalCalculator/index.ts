@@ -1,4 +1,14 @@
 export { RentalCalculator } from './RentalCalculator'
 export { useRentalForm } from './useRentalForm'
 export { useLeadForm } from './useLeadForm'
-export { formatModelLabel, inputClasses, labelClasses, checkboxClasses, checkboxLabelClasses, radioLabelClasses, buttonClasses, errorClasses } from './utils'
+export {
+  formatModelLabel,
+  inputClasses,
+  labelClasses,
+  checkboxClasses,
+  checkboxLabelClasses,
+  radioLabelClasses,
+  buttonClasses,
+  errorClasses,
+} from './utils'
+export { VEHICLE_TYPES, VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'

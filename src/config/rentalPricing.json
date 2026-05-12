@@ -54,7 +54,8 @@
     },
     "cancellationWaiver": {
       "daily": 20,
-      "min": 240
+      "min": 240,
+      "description": "Cancellation Waiver"
     },
     "vipCollisionDamageWaiver": {
       "daily": 30,

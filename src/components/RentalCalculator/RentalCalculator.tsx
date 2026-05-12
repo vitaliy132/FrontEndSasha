@@ -5,9 +5,21 @@ import { buildSubmitLeadRequest } from '../../lib/submitLeadPayload'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
+import { VEHICLE_TYPES, VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
-import { formatModelLabel, useLeadForm, useRentalForm, inputClasses, labelClasses, checkboxClasses, checkboxLabelClasses, radioLabelClasses, buttonClasses, errorClasses } from './index'
+import {
+  formatModelLabel,
+  inputClasses,
+  labelClasses,
+  checkboxClasses,
+  checkboxLabelClasses,
+  radioLabelClasses,
+  buttonClasses,
+  errorClasses,
+} from './utils'
+import { useLeadForm } from './useLeadForm'
+import { useRentalForm } from './useRentalForm'
 import { Spinner } from './Spinner'
 
 
@@ -228,10 +240,11 @@ export function RentalCalculator() {
                     className={inputClasses}
                     disabled={calculating}
                   >
-                    <option value="classA">Class A</option>
-                    <option value="classB">Class B</option>
-                    <option value="classC">Class C</option>
-                    <option value="trailer">Trailer</option>
+                    {VEHICLE_TYPES.map(vt => (
+                      <option key={vt} value={vt}>
+                        {VEHICLE_TYPE_LABEL[vt]}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

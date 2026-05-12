@@ -1,12 +1,6 @@
 import { defaultVehicleModel } from './rentalQuote'
+import { VEHICLE_TYPES } from './vehicleTypes'
 import type { VehicleType } from '../types/rental'
-
-const VEHICLE_TYPES: VehicleType[] = [
-  'classA',
-  'classB',
-  'classC',
-  'trailer',
-]
 
 function getParam(search: URLSearchParams, ...keys: string[]): string | null {
   for (const key of keys) {
