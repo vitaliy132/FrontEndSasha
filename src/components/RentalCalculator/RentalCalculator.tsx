@@ -1,6 +1,7 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useState } from 'react'
 import { submitLead, calculateRental } from '../../lib/api'
+import { buildSubmitLeadRequest } from '../../lib/submitLeadPayload'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
@@ -114,14 +115,19 @@ export function RentalCalculator() {
 
     setLeadLoading(true)
     try {
-      await submitLead({
-        userId: userId?.trim() ?? '',
-        name: leadFormData.name.trim(),
-        email: leadFormData.email.trim(),
-        phone: leadFormData.phone.trim(),
-        address: leadFormData.address.trim(),
-        quote,
-      })
+      await submitLead(
+        buildSubmitLeadRequest({
+          userId: userId?.trim() ?? '',
+          name: leadFormData.name.trim(),
+          email: leadFormData.email.trim(),
+          phone: leadFormData.phone.trim(),
+          address: leadFormData.address.trim(),
+          quote,
+          rental: formData,
+          vehicleModelLabel: formatModelLabel(formData.vehicleModel, formData.vehicleType),
+          result,
+        }),
+      )
       setLeadSuccess(true)
     } catch (err) {
       setLeadError(

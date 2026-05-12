@@ -76,7 +76,11 @@ export async function calculateRental(body: RentalCalculateRequest): Promise<Ren
   }
 }
 
-export async function submitLead(body: SubmitLeadRequest): Promise<void> {
+export interface SubmitLeadResponse {
+  message: string
+}
+
+export async function submitLead(body: SubmitLeadRequest): Promise<SubmitLeadResponse> {
   const res = await fetch(`${API_BASE}/submit-lead`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -89,5 +93,21 @@ export async function submitLead(body: SubmitLeadRequest): Promise<void> {
   if (!res.ok) {
     const errorMessage = await buildErrorMessage(res, !!isJson)
     throw new Error(errorMessage)
+  }
+
+  if (!isJson) {
+    return { message: 'Request submitted' }
+  }
+
+  const text = await res.text()
+  if (!text.trim()) {
+    return { message: 'Request submitted' }
+  }
+
+  try {
+    const data = JSON.parse(text) as { message?: string }
+    return { message: data.message ?? 'Request submitted' }
+  } catch {
+    throw new Error('Could not read server response after submit.')
   }
 }

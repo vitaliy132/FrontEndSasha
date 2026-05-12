@@ -52,6 +52,7 @@ export interface RentalCalculateResponse {
   lineItems?: { name: string; value: number }[]
 }
 
+/** Body for POST /submit-lead (matches server `calculatorLead.schema` extras). */
 export interface SubmitLeadRequest {
   userId: string
   name: string
@@ -59,4 +60,24 @@ export interface SubmitLeadRequest {
   phone: string
   address: string
   quote: string
+  vehicleType?: VehicleType
+  vehicleModel?: string
+  vehicleModelLabel?: string
+  startDate?: string
+  endDate?: string
+  cancellationWaiver?: boolean
+  windshieldCoverage?: boolean
+  generatorDailyUnlimited?: boolean
+  kmPackages?: number
+  kmPackages100?: number
+  generatorHours?: number
+  extraKm?: number
+  kitchenKit?: boolean
+  beddingKitPeople?: number
+  personalKitPeople?: number
+  bikeRack?: boolean
+  hasOwnHitch?: boolean
+  additionalNotes?: string
+  rentalDetails?: Record<string, unknown>
+  quoteBreakdown?: RentalQuoteBreakdown | Record<string, unknown>
 }
