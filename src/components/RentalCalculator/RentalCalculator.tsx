@@ -26,8 +26,6 @@ export function RentalCalculator() {
 
   const [showKitchenTooltip, setShowKitchenTooltip] = useState(false)
   const [showBeddingTooltip, setShowBeddingTooltip] = useState(false)
-  const [showCancellationTooltip, setShowCancellationTooltip] = useState(false)
-
   const selectedDays = (() => {
     if (!formData.startDate || !formData.endDate) return null
     const start = new Date(`${formData.startDate}T00:00:00`)
@@ -268,21 +266,7 @@ export function RentalCalculator() {
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
-                    Cancellation waiver ($20/day, min $240) <span 
-                      className="info-icon" 
-                      onMouseEnter={() => setShowCancellationTooltip(true)}
-                      onMouseLeave={() => setShowCancellationTooltip(false)}
-                    >ℹ️</span>
-                    {showCancellationTooltip && (
-                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-slate-50 p-3 text-sm text-slate-900 shadow-lg border border-slate-200">
-                        <p className="mb-2 font-medium">Protection against cancellation losses:</p>
-                        <ul className="space-y-1">
-                          <li>• Full refund if you cancel up to 7 days before rental start</li>
-                          <li>• 50% refund if you cancel 3-6 days before rental start</li>
-                          <li>• No refund if you cancel less than 3 days before rental start</li>
-                        </ul>
-                      </div>
-                    )}
+                    Cancellation waiver ($20/day, min $240)
                   </span>
                 </label>
 
