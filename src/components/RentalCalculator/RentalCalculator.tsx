@@ -9,6 +9,7 @@ import { VEHICLE_TYPES, VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
 import {
+  buildRentalCalculateRequest,
   formatModelLabel,
   inputClasses,
   labelClasses,
@@ -58,8 +59,6 @@ export function RentalCalculator() {
       return
     }
 
-    const beddingKitPeopleNum = Number(formData.beddingKitPeople)
-
     const validationError = validateRentalForm({
       startDate: formData.startDate,
       endDate: formData.endDate,
@@ -73,24 +72,7 @@ export function RentalCalculator() {
 
     setCalculating(true)
     try {
-      const kmPackagesNum = formData.vehicleType === 'trailer' ? 0 : Number(formData.mileagePackage)
-      const extraKmNum = 0
-      const generatorDailyUnlimited = formData.generatorType === 'dailyUnlimited'
-
-      const data = await calculateRental({
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        vehicleType: formData.vehicleType,
-        vehicleModel: formData.vehicleModel,
-        cancellationWaiver: formData.cancellationWaiver,
-        windshieldCoverage: formData.windshieldCoverage,
-        generatorDailyUnlimited,
-        kmPackages: kmPackagesNum,
-        extraKm: extraKmNum,
-        kitchenKit: formData.kitchenKit,
-        beddingKitPeople: beddingKitPeopleNum,
-        bikeRack: false,
-      })
+      const data = await calculateRental(buildRentalCalculateRequest(formData))
       setResult(data)
     } catch (err) {
       setResult(null)

@@ -1,5 +1,6 @@
 import { VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'
-import type { VehicleType } from '../../types/rental'
+import type { RentalCalculateRequest, VehicleType } from '../../types/rental'
+import type { RentalFormData } from './useRentalForm'
 
 /**
  * Display labels aligned with operator rate sheet (internal model keys unchanged).
@@ -28,6 +29,23 @@ export function formatModelLabel(id: string, vehicleType: VehicleType): string {
   if (parts.length < 2) return id.replaceAll('_', ' ')
   const size = parts[0].replace('ft', '')
   return `${typeLabel} ${size}`
+}
+
+export function buildRentalCalculateRequest(formData: RentalFormData): RentalCalculateRequest {
+  return {
+    startDate: formData.startDate,
+    endDate: formData.endDate,
+    vehicleType: formData.vehicleType,
+    vehicleModel: formData.vehicleModel,
+    cancellationWaiver: formData.cancellationWaiver,
+    windshieldCoverage: formData.windshieldCoverage,
+    generatorDailyUnlimited: formData.generatorType === 'dailyUnlimited',
+    kmPackages: formData.vehicleType === 'trailer' ? 0 : Number(formData.mileagePackage),
+    extraKm: 0,
+    kitchenKit: formData.kitchenKit,
+    beddingKitPeople: Number(formData.beddingKitPeople),
+    bikeRack: false,
+  }
 }
 
 // Common CSS classes for form elements
