@@ -1,4 +1,9 @@
-import type { SubmitLeadRequest, RentalCalculateRequest, RentalCalculateResponse } from '../types/rental'
+import type {
+  SubmitLeadRequest,
+  RentalCalculateRequest,
+  RentalCalculateResponse,
+  RentalOptionsResponse,
+} from '../types/rental'
 
 /** Empty string = same origin (Vite dev server proxies to the API). Set VITE_API_BASE in production. */
 const API_BASE =
@@ -28,6 +33,23 @@ async function buildErrorMessage(res: Response, isJson: boolean): Promise<string
   }
 
   return errorMessage
+}
+
+export async function fetchRentalOptions(): Promise<RentalOptionsResponse> {
+  const res = await fetch(`${API_BASE}/rental-options`)
+  const contentType = res.headers.get('content-type')
+  const isJson = contentType?.includes('application/json')
+
+  if (!res.ok) {
+    const errorMessage = await buildErrorMessage(res, !!isJson)
+    throw new Error(errorMessage)
+  }
+
+  if (!isJson) {
+    throw new Error('Invalid response type: expected JSON for rental options.')
+  }
+
+  return await res.json() as RentalOptionsResponse
 }
 
 export async function calculateRental(body: RentalCalculateRequest): Promise<RentalCalculateResponse> {

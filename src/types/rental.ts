@@ -1,10 +1,27 @@
 export type VehicleType = 'classA' | 'classB' | 'classC' | 'trailer'
 
+export interface RentalVehicleModelOption {
+  id: string
+  label: string
+}
+
+export interface RentalVehicleTypeOption {
+  id: VehicleType
+  label: string
+  defaultModel: string
+  models: RentalVehicleModelOption[]
+}
+
+export interface RentalOptionsResponse {
+  minimumRentalDays: number
+  vehicleTypes: RentalVehicleTypeOption[]
+}
+
 export interface RentalCalculateRequest {
   startDate: string
   endDate: string
   vehicleType: VehicleType
-  /** Fleet unit key from `rentalPricing.json` → PRICING[vehicleType]. */
+  /** Fleet unit key from the backend pricing table. */
   vehicleModel: string
   cancellationWaiver: boolean
   windshieldCoverage: boolean

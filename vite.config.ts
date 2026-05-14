@@ -11,6 +11,10 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
+      '/rental-options': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
       '/submit-lead': {
         target: 'http://localhost:3000',
         changeOrigin: true,

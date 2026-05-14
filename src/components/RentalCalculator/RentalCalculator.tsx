@@ -5,12 +5,10 @@ import { buildSubmitLeadRequest } from '../../lib/submitLeadPayload'
 import { validateLeadForm, validateRentalForm } from '../../lib/validation'
 import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
-import { VEHICLE_TYPES, VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
 import {
   buildRentalCalculateRequest,
-  formatModelLabel,
   inputClasses,
   labelClasses,
   checkboxClasses,
@@ -25,7 +23,18 @@ import { Spinner } from './Spinner'
 
 
 export function RentalCalculator() {
-  const { formData, modelOptions, updateField, updateVehicleType, userId } = useRentalForm()
+  const {
+    formData,
+    vehicleTypes,
+    modelOptions,
+    selectedModelLabel,
+    minimumRentalDays,
+    rentalOptionsLoading,
+    rentalOptionsError,
+    updateField,
+    updateVehicleType,
+    userId,
+  } = useRentalForm()
   const { formData: leadFormData, updateField: updateLeadField } = useLeadForm()
 
   const [calculating, setCalculating] = useState(false)
@@ -48,14 +57,26 @@ export function RentalCalculator() {
     return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
   })()
 
-  const tooShortRental = selectedDays !== null && selectedDays < 5
+  const tooShortRental = selectedDays !== null && selectedDays < minimumRentalDays
+  const cannotCalculate =
+    calculating || tooShortRental || rentalOptionsLoading || !!rentalOptionsError || !formData.vehicleModel
 
   async function handleCalculate(e: FormEvent) {
     e.preventDefault()
     setCalcError(null)
 
+    if (rentalOptionsLoading) {
+      setCalcError('Rental options are still loading. Please wait a moment.')
+      return
+    }
+
+    if (rentalOptionsError) {
+      setCalcError(rentalOptionsError)
+      return
+    }
+
     if (tooShortRental) {
-      setCalcError('Minimum rental period is 5 days. Please pick a longer date range.')
+      setCalcError(`Minimum rental period is ${minimumRentalDays} days. Please pick a longer date range.`)
       return
     }
 
@@ -116,7 +137,7 @@ export function RentalCalculator() {
           address: leadFormData.address.trim(),
           quote,
           rental: formData,
-          vehicleModelLabel: formatModelLabel(formData.vehicleModel, formData.vehicleType),
+          vehicleModelLabel: selectedModelLabel,
           result,
         }),
       )
@@ -200,7 +221,7 @@ export function RentalCalculator() {
                 {tooShortRental ? (
                   <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3">
                     <p className="text-xs font-medium text-amber-900">
-                      Minimum rental period is 5 days. Please pick a longer date range to continue.
+                      Minimum rental period is {minimumRentalDays} days. Please pick a longer date range to continue.
                     </p>
                   </div>
                 ) : null}
@@ -220,13 +241,19 @@ export function RentalCalculator() {
                       updateVehicleType(vt)
                     }}
                     className={inputClasses}
-                    disabled={calculating}
+                    disabled={calculating || rentalOptionsLoading}
                   >
-                    {VEHICLE_TYPES.map(vt => (
-                      <option key={vt} value={vt}>
-                        {VEHICLE_TYPE_LABEL[vt]}
+                    {vehicleTypes.length > 0 ? (
+                      vehicleTypes.map(vehicleType => (
+                        <option key={vehicleType.id} value={vehicleType.id}>
+                          {vehicleType.label}
+                        </option>
+                      ))
+                    ) : (
+                      <option value={formData.vehicleType}>
+                        {rentalOptionsLoading ? 'Loading vehicle types...' : formData.vehicleType}
                       </option>
-                    ))}
+                    )}
                   </select>
                 </div>
 
@@ -242,13 +269,19 @@ export function RentalCalculator() {
                     value={formData.vehicleModel}
                     onChange={(e) => updateField('vehicleModel', e.target.value)}
                     className={inputClasses}
-                    disabled={calculating}
+                    disabled={calculating || rentalOptionsLoading}
                   >
-                    {modelOptions.map((id: string) => (
-                      <option key={id} value={id}>
-                        {formatModelLabel(id, formData.vehicleType)}
+                    {modelOptions.length > 0 ? (
+                      modelOptions.map(model => (
+                        <option key={model.id} value={model.id}>
+                          {model.label}
+                        </option>
+                      ))
+                    ) : (
+                      <option value={formData.vehicleModel}>
+                        {rentalOptionsLoading ? 'Loading vehicle models...' : 'No models available'}
                       </option>
-                    ))}
+                    )}
                   </select>
                 </div>
 
@@ -422,6 +455,15 @@ export function RentalCalculator() {
                   Generator is charged upon drop off at $5 per hour of use.
                 </p>
 
+                {rentalOptionsError ? (
+                  <p
+                    className={errorClasses}
+                    role="alert"
+                  >
+                    {rentalOptionsError}
+                  </p>
+                ) : null}
+
                 {calcError ? (
                   <p
                     className={errorClasses}
@@ -433,9 +475,9 @@ export function RentalCalculator() {
 
                 <button
                   type="submit"
-                  disabled={calculating || tooShortRental}
-                  aria-disabled={calculating || tooShortRental}
-                  title={tooShortRental ? 'Minimum rental period is 5 days' : undefined}
+                  disabled={cannotCalculate}
+                  aria-disabled={cannotCalculate}
+                  title={tooShortRental ? `Minimum rental period is ${minimumRentalDays} days` : undefined}
                   className={`${buttonClasses} w-full disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   {calculating ? (

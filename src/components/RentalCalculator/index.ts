@@ -2,7 +2,6 @@ export { RentalCalculator } from './RentalCalculator'
 export { useRentalForm } from './useRentalForm'
 export { useLeadForm } from './useLeadForm'
 export {
-  formatModelLabel,
   inputClasses,
   labelClasses,
   checkboxClasses,

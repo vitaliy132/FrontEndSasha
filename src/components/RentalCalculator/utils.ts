@@ -1,35 +1,5 @@
-import { VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'
-import type { RentalCalculateRequest, VehicleType } from '../../types/rental'
+import type { RentalCalculateRequest } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
-
-/**
- * Display labels aligned with operator rate sheet (internal model keys unchanged).
- */
-const MODEL_OPTION_LABEL: Record<string, string> = {
-  '30ft_2024': '30 with slide out — 2024-2026',
-  '32ft_2017': '32 with slide out/bunks — Economy 2017',
-  '34ft_2023': '34 with slide out — 2023-2026',
-  '35_36ft_slideout_bunks_2025': '35-36 with slide out/bunks — 2025-2026',
-  '31ft_slideout_bunks_2019': '31 with slide out/bunks — 2019-2026',
-  '25ft_slideout_2021_2023': '25 with slide out — 2021-2026',
-  '25ft_slideout_2018_economy': '25 with slide out — Economy 2018',
-  '23ft_2020_2026': '23 — 2020-2026',
-  '23ft_2021_2023': '23 — 2021-2026',
-  '19ft_2023': '19 — 2023-2026',
-  '27ft_bunks_2024': '27 with bunks — 2024-2026',
-}
-
-export function formatModelLabel(id: string, vehicleType: VehicleType): string {
-  const typeLabel = VEHICLE_TYPE_LABEL[vehicleType]
-  const custom = MODEL_OPTION_LABEL[id]
-  if (custom) {
-    return `${typeLabel} — ${custom}`
-  }
-  const parts = id.split('_')
-  if (parts.length < 2) return id.replaceAll('_', ' ')
-  const size = parts[0].replace('ft', '')
-  return `${typeLabel} ${size}`
-}
 
 export function buildRentalCalculateRequest(formData: RentalFormData): RentalCalculateRequest {
   return {

@@ -1,4 +1,3 @@
-import { defaultVehicleModel } from './rentalQuote'
 import { VEHICLE_TYPES } from './vehicleTypes'
 import type { VehicleType } from '../types/rental'
 
@@ -24,7 +23,7 @@ function parseVehicleType(raw: string | null): VehicleType | undefined {
   return VEHICLE_TYPES.includes(normalized) ? normalized : undefined
 }
 
-/** Legacy Class A keys merged into `35_36ft_slideout_bunks_2025` in `rentalPricing.json`. */
+/** Legacy Class A keys merged into the current backend pricing model key. */
 function resolveVehicleModelKey(vehicleType: VehicleType, model: string): string {
   if (vehicleType === 'classA' && (model === '35ft_2025' || model === '36ft_2025')) {
     return '35_36ft_slideout_bunks_2025'
@@ -72,7 +71,7 @@ export function readRentalQueryParams(search: string): RentalPrefill {
   )
   const vehicleModel = resolveVehicleModelKey(
     vehicle,
-    vehicleModelRaw?.trim() || defaultVehicleModel(vehicle),
+    vehicleModelRaw?.trim() || '',
   )
   const cancellationWaiver =
     parseBool(
