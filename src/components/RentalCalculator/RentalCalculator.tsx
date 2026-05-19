@@ -171,9 +171,6 @@ export function RentalCalculator() {
             width={459}
             height={97}
           />
-          <p className="mt-3 max-w-2xl text-base text-slate-600">
-            Configure your trip, get an instant quote, and confirm availability.
-          </p>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
