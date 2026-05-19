@@ -162,7 +162,7 @@ export function RentalCalculator() {
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <header className="mb-10 text-center lg:mb-12 lg:text-left">
           <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-            Fleet rentals
+            RV Rentals
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Rental Quote Calculator
