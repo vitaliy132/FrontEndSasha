@@ -160,17 +160,27 @@ export function RentalCalculator() {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <header className="mb-10 text-center lg:mb-12">
-          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-            RV Rentals
-          </p>
-          <img
-            src="/logo.svg"
-            alt="Company logo"
-            className="mx-auto mt-3 h-10 w-auto sm:h-12"
-            width={459}
-            height={97}
-          />
+        <header className="mb-10 lg:mb-12">
+          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-3 lg:gap-4">
+            <div className="text-left">
+              <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
+                RV Rentals
+              </p>
+              <p className="mt-3 max-w-md text-base text-slate-600">
+                Configure your trip, get an instant quote, and confirm availability.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <img
+                src="/logo.svg"
+                alt="Company logo"
+                className="h-10 w-auto sm:h-12"
+                width={459}
+                height={97}
+              />
+            </div>
+            <div className="hidden lg:block" aria-hidden="true" />
+          </div>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
