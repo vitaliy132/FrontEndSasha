@@ -9,10 +9,6 @@ import type {
 const API_BASE =
   import.meta.env.VITE_API_BASE?.replace(/\/$/, '') ?? ''
 
-export function getApiBase(): string {
-  return API_BASE || '(same origin / proxy)'
-}
-
 async function buildErrorMessage(res: Response, isJson: boolean): Promise<string> {
   let errorMessage = `Request failed (${res.status})`
 
@@ -53,49 +49,25 @@ export async function fetchRentalOptions(): Promise<RentalOptionsResponse> {
 }
 
 export async function calculateRental(body: RentalCalculateRequest): Promise<RentalCalculateResponse> {
-  const url = `${API_BASE}/calculate-rental`
-  console.log('API Request:', { url, body })
-  
-  const res = await fetch(url, {
+  const res = await fetch(`${API_BASE}/calculate-rental`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-
-  console.log('API Response:', { status: res.status, statusText: res.statusText, headers: res.headers })
 
   const contentType = res.headers.get('content-type')
   const isJson = contentType?.includes('application/json')
 
   if (!res.ok) {
     const errorMessage = await buildErrorMessage(res, !!isJson)
-    console.error('API Error:', errorMessage)
     throw new Error(errorMessage)
   }
 
   if (!isJson) {
-    const text = await res.text()
-    const err = `Invalid response type: expected JSON, got ${contentType || 'unknown'}. Response: ${text}`
-    console.error('Content Type Error:', err)
-    throw new Error(err)
+    throw new Error('Invalid response type: expected JSON for rental calculation.')
   }
 
-  try {
-    const responseText = await res.text()
-    console.log('Response Text:', responseText)
-    
-    if (!responseText || responseText.trim() === '') {
-      throw new Error('Response body is empty')
-    }
-    
-    const data = JSON.parse(responseText) as RentalCalculateResponse
-    console.log('Parsed Response:', data)
-    return data
-  } catch (err) {
-    const errorMsg = `Failed to parse response: ${err instanceof Error ? err.message : 'Unknown error'}`
-    console.error('Parse Error:', errorMsg)
-    throw new Error(errorMsg)
-  }
+  return await res.json() as RentalCalculateResponse
 }
 
 export interface SubmitLeadResponse {

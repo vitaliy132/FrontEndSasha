@@ -51,7 +51,7 @@ export function useRentalForm() {
     vehicleType: initial.vehicleType,
     vehicleModel: initial.vehicleModel,
     generatorType: initial.generatorDailyUnlimited ? 'dailyUnlimited' : 'none',
-    mileagePackage: '0',
+    mileagePackage: String(initial.kmPackages ?? 0),
     mileagePerKm: String(initial.extraKm || ''),
     kitchenKit: initial.kitchenKit,
     beddingKitPeople: String(initial.beddingKitPeople),

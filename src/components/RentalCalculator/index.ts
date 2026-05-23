@@ -10,4 +10,4 @@ export {
   buttonClasses,
   errorClasses,
 } from './utils'
-export { VEHICLE_TYPES, VEHICLE_TYPE_LABEL } from '../../lib/vehicleTypes'
+export { VEHICLE_TYPES } from '../../lib/vehicleTypes'

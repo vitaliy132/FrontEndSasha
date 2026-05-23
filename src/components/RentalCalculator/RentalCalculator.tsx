@@ -7,6 +7,7 @@ import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
 import type { RentalFormData } from './useRentalForm'
 import { BookingLeadForm } from './BookingLeadForm'
 import { BreakdownList } from './BreakdownList'
+import { KitchenKitTooltip, PersonalKitTooltip } from './InfoTooltip'
 import {
   buildRentalCalculateRequest,
   inputClasses,
@@ -46,8 +47,6 @@ export function RentalCalculator() {
   const [leadError, setLeadError] = useState<string | null>(null)
   const [leadSuccess, setLeadSuccess] = useState(false)
 
-  const [showKitchenTooltip, setShowKitchenTooltip] = useState(false)
-  const [showBeddingTooltip, setShowBeddingTooltip] = useState(false)
   const selectedDays = (() => {
     if (!formData.startDate || !formData.endDate) return null
     const start = new Date(`${formData.startDate}T00:00:00`)
@@ -305,31 +304,8 @@ export function RentalCalculator() {
                     disabled={calculating}
                   />
                   <span className="text-sm font-medium text-slate-800">
-                    Kitchen Kit ($85/trip) <span 
-                      className="info-icon" 
-                      onMouseEnter={() => setShowKitchenTooltip(true)}
-                      onMouseLeave={() => setShowKitchenTooltip(false)}
-                    >ℹ️</span>
-                    {showKitchenTooltip && (
-                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-slate-50 p-3 text-sm text-slate-900 shadow-lg border border-slate-200">
-                        <ul className="space-y-1">
-                          <li>Toaster</li>
-                          <li>Pots with lids</li>
-                          <li>Frying pan</li>
-                          <li>Kettle</li>
-                          <li>Coffee / tea pot</li>
-                          <li>Carving knife</li>
-                          <li>Tongs</li>
-                          <li>Oven mitts</li>
-                          <li>Salt & pepper shakers</li>
-                          <li>Mixing bowls</li>
-                          <li>Measuring cups</li>
-                          <li>Wooden spoons</li>
-                          <li>Tea towels</li>
-                          <li>Dish cloths</li>
-                        </ul>
-                      </div>
-                    )}
+                    Kitchen Kit ($85/trip)
+                    <KitchenKitTooltip />
                   </span>
                 </label>
 
@@ -338,25 +314,8 @@ export function RentalCalculator() {
                     htmlFor="bedding-kit-people"
                     className={labelClasses}
                   >
-                    Personal Kit ($35/person) <span 
-                      className="info-icon" 
-                      onMouseEnter={() => setShowBeddingTooltip(true)}
-                      onMouseLeave={() => setShowBeddingTooltip(false)}
-                    >ℹ️</span>
-                    {showBeddingTooltip && (
-                      <div className="absolute z-10 mt-1 w-64 rounded-md bg-slate-50 p-3 text-sm text-slate-900 shadow-lg border border-slate-200">
-                        <ul className="space-y-1">
-                          <li>Blanket</li>
-                          <li>Bottom sheet</li>
-                          <li>Top sheet</li>
-                          <li>Pillow + pillowcase</li>
-                          <li>Face cloth</li>
-                          <li>Hand towel</li>
-                          <li>Bath towel</li>
-                          <li>Hanger</li>
-                        </ul>
-                      </div>
-                    )}
+                    Personal Kit ($35/person)
+                    <PersonalKitTooltip />
                   </label>
                   <input
                     id="bedding-kit-people"
