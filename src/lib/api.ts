@@ -6,15 +6,14 @@ import type {
 } from '../types/rental'
 
 /** Empty string = same origin (Vite dev server proxies to the API). Set VITE_API_BASE in production. */
-const API_BASE =
-  import.meta.env.VITE_API_BASE?.replace(/\/$/, '') ?? ''
+const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, '') ?? ''
 
 async function buildErrorMessage(res: Response, isJson: boolean): Promise<string> {
   let errorMessage = `Request failed (${res.status})`
 
   if (isJson) {
     try {
-      const errorData = await res.json() as { error?: string; message?: string }
+      const errorData = (await res.json()) as { error?: string; message?: string }
       return errorData.message || errorData.error || errorMessage
     } catch {
       // Fall through to text fallback
@@ -31,43 +30,54 @@ async function buildErrorMessage(res: Response, isJson: boolean): Promise<string
   return errorMessage
 }
 
-export async function fetchRentalOptions(): Promise<RentalOptionsResponse> {
-  const res = await fetch(`${API_BASE}/rental-options`)
-  const contentType = res.headers.get('content-type')
-  const isJson = contentType?.includes('application/json')
+function isJsonResponse(res: Response): boolean {
+  return res.headers.get('content-type')?.includes('application/json') ?? false
+}
+
+interface FetchJsonOptions {
+  allowEmptyBody?: boolean
+}
+
+async function fetchJson<T>(path: string, init?: RequestInit, options?: FetchJsonOptions): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, init)
+  const isJson = isJsonResponse(res)
 
   if (!res.ok) {
-    const errorMessage = await buildErrorMessage(res, !!isJson)
-    throw new Error(errorMessage)
+    throw new Error(await buildErrorMessage(res, isJson))
   }
 
   if (!isJson) {
-    throw new Error('Invalid response type: expected JSON for rental options.')
+    if (options?.allowEmptyBody) {
+      return { message: 'Request submitted' } as T
+    }
+    throw new Error(`Invalid response type: expected JSON from ${path}.`)
   }
 
-  return await res.json() as RentalOptionsResponse
+  const text = await res.text()
+  if (!text.trim()) {
+    if (options?.allowEmptyBody) {
+      return { message: 'Request submitted' } as T
+    }
+    throw new Error(`Empty JSON response from ${path}.`)
+  }
+
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    throw new Error(`Could not parse JSON from ${path}.`)
+  }
+}
+
+export async function fetchRentalOptions(): Promise<RentalOptionsResponse> {
+  return fetchJson<RentalOptionsResponse>('/rental-options')
 }
 
 export async function calculateRental(body: RentalCalculateRequest): Promise<RentalCalculateResponse> {
-  const res = await fetch(`${API_BASE}/calculate-rental`, {
+  return fetchJson<RentalCalculateResponse>('/calculate-rental', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-
-  const contentType = res.headers.get('content-type')
-  const isJson = contentType?.includes('application/json')
-
-  if (!res.ok) {
-    const errorMessage = await buildErrorMessage(res, !!isJson)
-    throw new Error(errorMessage)
-  }
-
-  if (!isJson) {
-    throw new Error('Invalid response type: expected JSON for rental calculation.')
-  }
-
-  return await res.json() as RentalCalculateResponse
 }
 
 export interface SubmitLeadResponse {
@@ -75,33 +85,14 @@ export interface SubmitLeadResponse {
 }
 
 export async function submitLead(body: SubmitLeadRequest): Promise<SubmitLeadResponse> {
-  const res = await fetch(`${API_BASE}/submit-lead`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-
-  const contentType = res.headers.get('content-type')
-  const isJson = contentType?.includes('application/json')
-
-  if (!res.ok) {
-    const errorMessage = await buildErrorMessage(res, !!isJson)
-    throw new Error(errorMessage)
-  }
-
-  if (!isJson) {
-    return { message: 'Request submitted' }
-  }
-
-  const text = await res.text()
-  if (!text.trim()) {
-    return { message: 'Request submitted' }
-  }
-
-  try {
-    const data = JSON.parse(text) as { message?: string }
-    return { message: data.message ?? 'Request submitted' }
-  } catch {
-    throw new Error('Could not read server response after submit.')
-  }
+  const data = await fetchJson<{ message?: string }>(
+    '/submit-lead',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+    { allowEmptyBody: true },
+  )
+  return { message: data.message ?? 'Request submitted' }
 }

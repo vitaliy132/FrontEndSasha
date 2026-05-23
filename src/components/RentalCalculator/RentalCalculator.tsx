@@ -1,27 +1,11 @@
-import type { ChangeEvent, FormEvent } from 'react'
-import { useState } from 'react'
-import { submitLead, calculateRental } from '../../lib/api'
-import { buildSubmitLeadRequest } from '../../lib/submitLeadPayload'
-import { validateLeadForm, validateRentalForm } from '../../lib/validation'
-import type { RentalCalculateResponse, VehicleType } from '../../types/rental'
-import type { RentalFormData } from './useRentalForm'
-import { BookingLeadForm } from './BookingLeadForm'
-import { BreakdownList } from './BreakdownList'
-import { KitchenKitTooltip, PersonalKitTooltip } from './InfoTooltip'
-import {
-  buildRentalCalculateRequest,
-  inputClasses,
-  labelClasses,
-  checkboxClasses,
-  checkboxLabelClasses,
-  radioLabelClasses,
-  buttonClasses,
-  errorClasses,
-} from './utils'
+import { CalculatorHeader } from './CalculatorHeader'
+import { ContactSection } from './ContactSection'
+import { EstimatePanel } from './EstimatePanel'
+import { TripDetailsForm } from './TripDetailsForm'
 import { useLeadForm } from './useLeadForm'
+import { useLeadSubmission } from './useLeadSubmission'
+import { useRentalCalculation } from './useRentalCalculation'
 import { useRentalForm } from './useRentalForm'
-import { Spinner } from './Spinner'
-
 
 export function RentalCalculator() {
   const {
@@ -36,119 +20,37 @@ export function RentalCalculator() {
     updateVehicleType,
     userId,
   } = useRentalForm()
+
   const { formData: leadFormData, updateField: updateLeadField } = useLeadForm()
 
-  const [calculating, setCalculating] = useState(false)
-  const [calcError, setCalcError] = useState<string | null>(null)
-  const [result, setResult] = useState<RentalCalculateResponse | null>(null)
+  const {
+    calculating,
+    calcError,
+    result,
+    tooShortRental,
+    cannotCalculate,
+    handleCalculate,
+  } = useRentalCalculation({
+    formData,
+    minimumRentalDays,
+    rentalOptionsLoading,
+    rentalOptionsError,
+  })
 
-  const [showBooking, setShowBooking] = useState(false)
-  const [leadLoading, setLeadLoading] = useState(false)
-  const [leadError, setLeadError] = useState<string | null>(null)
-  const [leadSuccess, setLeadSuccess] = useState(false)
-
-  const selectedDays = (() => {
-    if (!formData.startDate || !formData.endDate) return null
-    const start = new Date(`${formData.startDate}T00:00:00`)
-    const end = new Date(`${formData.endDate}T00:00:00`)
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null
-    if (end <= start) return null
-    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-  })()
-
-  const tooShortRental = selectedDays !== null && selectedDays < minimumRentalDays
-  const cannotCalculate =
-    calculating || tooShortRental || rentalOptionsLoading || !!rentalOptionsError || !formData.vehicleModel
-
-  async function handleCalculate(e: FormEvent) {
-    e.preventDefault()
-    setCalcError(null)
-
-    if (rentalOptionsLoading) {
-      setCalcError('Rental options are still loading. Please wait a moment.')
-      return
-    }
-
-    if (rentalOptionsError) {
-      setCalcError(rentalOptionsError)
-      return
-    }
-
-    if (tooShortRental) {
-      setCalcError(`Minimum rental period is ${minimumRentalDays} days. Please pick a longer date range.`)
-      return
-    }
-
-    const validationError = validateRentalForm({
-      startDate: formData.startDate,
-      endDate: formData.endDate,
-      vehicleType: formData.vehicleType,
-      vehicleModel: formData.vehicleModel,
-    })
-    if (validationError) {
-      setCalcError(validationError)
-      return
-    }
-
-    setCalculating(true)
-    try {
-      const data = await calculateRental(buildRentalCalculateRequest(formData))
-      setResult(data)
-    } catch (err) {
-      setResult(null)
-      const message = err instanceof Error ? err.message : 'Something went wrong. Try again.'
-      setCalcError(message)
-    } finally {
-      setCalculating(false)
-    }
-  }
-
-  async function handleLeadSubmit(e: FormEvent) {
-    e.preventDefault()
-    setLeadError(null)
-
-    const quote = result?.totalFormatted ?? ''
-    if (!quote) {
-      setLeadError('Calculate a quote first.')
-      return
-    }
-
-    const err = validateLeadForm({
-      name: leadFormData.name,
-      email: leadFormData.email,
-      phone: leadFormData.phone,
-      address: leadFormData.address,
-      userId,
-    })
-    if (err) {
-      setLeadError(err)
-      return
-    }
-
-    setLeadLoading(true)
-    try {
-      await submitLead(
-        buildSubmitLeadRequest({
-          userId: userId?.trim() ?? '',
-          name: leadFormData.name.trim(),
-          email: leadFormData.email.trim(),
-          phone: leadFormData.phone.trim(),
-          address: leadFormData.address.trim(),
-          quote,
-          rental: formData,
-          vehicleModelLabel: selectedModelLabel,
-          result,
-        }),
-      )
-      setLeadSuccess(true)
-    } catch (err) {
-      setLeadError(
-        err instanceof Error ? err.message : 'Could not submit. Try again.',
-      )
-    } finally {
-      setLeadLoading(false)
-    }
-  }
+  const {
+    showBooking,
+    leadLoading,
+    leadError,
+    leadSuccess,
+    openBookingForm,
+    handleLeadSubmit,
+  } = useLeadSubmission({
+    formData,
+    leadFormData,
+    selectedModelLabel,
+    result,
+    userId,
+  })
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
@@ -159,424 +61,40 @@ export function RentalCalculator() {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <header className="mb-10 lg:mb-12">
-          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-3 lg:gap-4">
-            <div className="text-left">
-              <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-                RV Rentals
-              </p>
-              <p className="mt-3 max-w-md text-base text-slate-600">
-                Configure your trip, get an instant quote, and confirm availability.
-              </p>
-            </div>
-            <div className="flex justify-center">
-              <img
-                src="/logo.svg"
-                alt="Company logo"
-                className="h-10 w-auto sm:h-12"
-                width={459}
-                height={97}
-              />
-            </div>
-            <div className="hidden lg:block" aria-hidden="true" />
-          </div>
-        </header>
+        <CalculatorHeader />
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
-          <section className="lg:col-span-5">
-            <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-xl shadow-slate-200/50 ring-1 ring-slate-900/5 backdrop-blur sm:p-8">
-              <h2 className="text-lg font-semibold text-slate-900">
-                Trip details
-              </h2>
-              <p className="mt-1 text-sm text-slate-600">
-                All fields are validated before we contact the server.
-              </p>
+          <TripDetailsForm
+            formData={formData}
+            vehicleTypes={vehicleTypes}
+            modelOptions={modelOptions}
+            minimumRentalDays={minimumRentalDays}
+            rentalOptionsLoading={rentalOptionsLoading}
+            rentalOptionsError={rentalOptionsError}
+            calculating={calculating}
+            calcError={calcError}
+            tooShortRental={tooShortRental}
+            cannotCalculate={cannotCalculate}
+            onSubmit={handleCalculate}
+            onUpdateField={updateField}
+            onUpdateVehicleType={updateVehicleType}
+          />
 
-              <form onSubmit={handleCalculate} className="mt-6 space-y-5">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="start-date"
-                      className={labelClasses}
-                    >
-                      Start date
-                    </label>
-                    <input
-                      id="start-date"
-                      type="date"
-                      value={formData.startDate}
-                      onChange={(e) => updateField('startDate', e.target.value)}
-                      className={inputClasses}
-                      disabled={calculating}
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="end-date"
-                      className={labelClasses}
-                    >
-                      End date
-                    </label>
-                    <input
-                      id="end-date"
-                      type="date"
-                      value={formData.endDate}
-                      onChange={(e) => updateField('endDate', e.target.value)}
-                      className={inputClasses}
-                      disabled={calculating}
-                    />
-                  </div>
-                </div>
+          <EstimatePanel
+            calculating={calculating}
+            result={result}
+            showBooking={showBooking}
+            leadFormData={leadFormData}
+            leadLoading={leadLoading}
+            leadError={leadError}
+            leadSuccess={leadSuccess}
+            userId={userId}
+            onOpenBooking={openBookingForm}
+            onLeadFieldChange={updateLeadField}
+            onLeadSubmit={handleLeadSubmit}
+          />
 
-                {tooShortRental ? (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-3">
-                    <p className="text-xs font-medium text-amber-900">
-                      Minimum rental period is {minimumRentalDays} days. Please pick a longer date range to continue.
-                    </p>
-                  </div>
-                ) : null}
-
-                <div>
-                  <label
-                    htmlFor="vehicle-type"
-                    className={labelClasses}
-                  >
-                    Vehicle type
-                  </label>
-                  <select
-                    id="vehicle-type"
-                    value={formData.vehicleType}
-                    onChange={(e) => {
-                      const vt = e.target.value as VehicleType
-                      updateVehicleType(vt)
-                    }}
-                    className={inputClasses}
-                    disabled={calculating || rentalOptionsLoading}
-                  >
-                    {vehicleTypes.length > 0 ? (
-                      vehicleTypes.map(vehicleType => (
-                        <option key={vehicleType.id} value={vehicleType.id}>
-                          {vehicleType.label}
-                        </option>
-                      ))
-                    ) : (
-                      <option value={formData.vehicleType}>
-                        {rentalOptionsLoading ? 'Loading vehicle types...' : formData.vehicleType}
-                      </option>
-                    )}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="vehicle-model"
-                    className={labelClasses}
-                  >
-                    Vehicle model
-                  </label>
-                  <select
-                    id="vehicle-model"
-                    value={formData.vehicleModel}
-                    onChange={(e) => updateField('vehicleModel', e.target.value)}
-                    className={inputClasses}
-                    disabled={calculating || rentalOptionsLoading}
-                  >
-                    {modelOptions.length > 0 ? (
-                      modelOptions.map(model => (
-                        <option key={model.id} value={model.id}>
-                          {model.label}
-                        </option>
-                      ))
-                    ) : (
-                      <option value={formData.vehicleModel}>
-                        {rentalOptionsLoading ? 'Loading vehicle models...' : 'No models available'}
-                      </option>
-                    )}
-                  </select>
-                </div>
-
-                <label className={checkboxLabelClasses}>
-                  <input
-                    type="checkbox"
-                    checked={formData.kitchenKit}
-                    onChange={(e) => updateField('kitchenKit', e.target.checked)}
-                    className={checkboxClasses}
-                    disabled={calculating}
-                  />
-                  <span className="text-sm font-medium text-slate-800">
-                    Kitchen Kit ($85/trip)
-                    <KitchenKitTooltip />
-                  </span>
-                </label>
-
-                <div>
-                  <label
-                    htmlFor="bedding-kit-people"
-                    className={labelClasses}
-                  >
-                    Personal Kit ($35/person)
-                    <PersonalKitTooltip />
-                  </label>
-                  <input
-                    id="bedding-kit-people"
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    step={1}
-                    value={formData.beddingKitPeople}
-                    onChange={(e) => updateField('beddingKitPeople', e.target.value)}
-                    className={inputClasses}
-                    disabled={calculating}
-                  />
-                </div>
-
-                {/* Mileage Options */}
-                {formData.vehicleType !== 'trailer' && (
-                  <div>
-                    <label
-                      htmlFor="mileage-type"
-                      className={labelClasses}
-                    >
-                      Quantity of 1,000km packages ($350 each)
-                    </label>
-                    <select
-                      id="mileage-type"
-                      value={formData.mileagePackage}
-                      onChange={(e) => updateField('mileagePackage', e.target.value)}
-                      className={inputClasses}
-                      disabled={calculating}
-                    >
-                      <option value="0">0</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
-                    <p className="mt-1 text-xs text-slate-600">
-                      Additional kms are $0.41 per km, charged at drop off
-                    </p>
-                  </div>
-                )}
-
-                {/* Generator Options */}
-                <fieldset className="space-y-3">
-                  <legend className={labelClasses}>
-                    Generator options
-                  </legend>
-                  <div className="space-y-2">
-                    <label className={radioLabelClasses}>
-                      <input
-                        type="radio"
-                        name="generator"
-                        value="none"
-                        checked={formData.generatorType === 'none'}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className={checkboxClasses}
-                        disabled={calculating}
-                      />
-                      <span className="text-sm font-medium text-slate-800">
-                        None ($0)
-                      </span>
-                    </label>
-                    <label className={radioLabelClasses}>
-                      <input
-                        type="radio"
-                        name="generator"
-                        value="dailyUnlimited"
-                        checked={formData.generatorType === 'dailyUnlimited'}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('generatorType', e.target.value as RentalFormData['generatorType'])}
-                        className={checkboxClasses}
-                        disabled={calculating}
-                      />
-                      <span className="text-sm font-medium text-slate-800">
-                        Daily unlimited ($60/day)
-                      </span>
-                    </label>
-                  </div>
-                </fieldset>
-                <p className="text-xs text-slate-600">
-                  Generator is charged upon drop off at $5 per hour of use.
-                </p>
-
-                {rentalOptionsError ? (
-                  <p
-                    className={errorClasses}
-                    role="alert"
-                  >
-                    {rentalOptionsError}
-                  </p>
-                ) : null}
-
-                {calcError ? (
-                  <p
-                    className={errorClasses}
-                    role="alert"
-                  >
-                    {calcError}
-                  </p>
-                ) : null}
-
-                <button
-                  type="submit"
-                  disabled={cannotCalculate}
-                  aria-disabled={cannotCalculate}
-                  title={tooShortRental ? `Minimum rental period is ${minimumRentalDays} days` : undefined}
-                  className={`${buttonClasses} w-full disabled:cursor-not-allowed disabled:opacity-60`}
-                >
-                  {calculating ? (
-                    <>
-                      <Spinner className="text-white" />
-                      Calculating…
-                    </>
-                  ) : (
-                    'Calculate Rental Price'
-                  )}
-                </button>
-              </form>
-            </div>
-          </section>
-
-          <section className="lg:col-span-7">
-            <div className="flex h-full flex-col gap-6">
-              <div className="flex-1 rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-xl shadow-slate-200/50 ring-1 ring-slate-900/5 backdrop-blur sm:p-8">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  Estimate
-                </h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  Results appear here after a successful calculation.
-                </p>
-
-                {!result && !calculating ? (
-                  <div className="mt-10 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-16 text-center">
-                    <p className="text-sm text-slate-500">
-                      No estimate yet. Fill the form and click{' '}
-                      <span className="font-medium text-slate-700">
-                        Calculate Rental Price
-                      </span>
-                      .
-                    </p>
-                  </div>
-                ) : null}
-
-                {calculating ? (
-                  <div
-                    className="mt-10 flex flex-col items-center justify-center gap-3 py-16"
-                    aria-live="polite"
-                  >
-                    <Spinner className="text-emerald-600" />
-                    <p className="text-sm font-medium text-slate-600">
-                      Calculating…
-                    </p>
-                  </div>
-                ) : null}
-
-                {result && !calculating ? (
-                  <div className="mt-6">
-                    <div className="rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white shadow-lg">
-                      <p className="text-sm leading-relaxed text-white/85">
-                        {result.summaryMessage}
-                      </p>
-                    </div>
-
-                    <BreakdownList breakdown={result.breakdown} totalFormatted={result.totalFormatted} />
-
-                    <p className="mt-6 rounded-lg border border-slate-200 bg-slate-50/90 px-3 py-3 text-xs leading-relaxed text-slate-600">
-                      Making a reservation request will only notify us of the request and is not a
-                      guarantee that the vehicle will be reserved. If you do not hear from us within
-                      24 hours, please contact us directly to confirm your reservation.
-                    </p>
-
-                    <div className="mt-6 flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowBooking(true)
-                          setLeadSuccess(false)
-                          setLeadError(null)
-                        }}
-                        className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:bg-emerald-50"
-                      >
-                        Confirm Availability
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
-              {showBooking && result ? (
-                <BookingLeadForm
-                  name={leadFormData.name}
-                  email={leadFormData.email}
-                  phone={leadFormData.phone}
-                  address={leadFormData.address}
-                  onChange={updateLeadField}
-                  onSubmit={handleLeadSubmit}
-                  loading={leadLoading}
-                  error={leadError}
-                  success={leadSuccess}
-                  userId={userId}
-                />
-              ) : null}
-            </div>
-          </section>
-
-          <section className="mt-12 border-t border-slate-200 pt-8 lg:col-span-12">
-            <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-lg shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur sm:p-8">
-              <h2 className="text-lg font-semibold text-slate-900">Contact Us</h2>
-              <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Pick Up/Drop Off Location
-                </p>
-                <address className="mt-2 block text-sm not-italic leading-relaxed text-slate-700">
-                  4888 South Service Rd
-                  <br />
-                  Beamsville, ON L3J 1L4
-                </address>
-                <a
-                  href="tel:905-548-8585"
-                  className="mt-3 inline-block text-base font-semibold text-emerald-600 hover:text-emerald-700"
-                >
-                  905-548-8585
-                </a>
-              </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-                <div className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Toll free
-                  </p>
-                  <a
-                    href="tel:1-888-539-3333"
-                    className="mt-2 block text-base font-semibold text-emerald-600 hover:text-emerald-700"
-                  >
-                    1-888-539-3333
-                  </a>
-                </div>
-                <div className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Call / text
-                  </p>
-                  <a
-                    href="tel:905-548-8585"
-                    className="mt-2 block text-base font-semibold text-emerald-600 hover:text-emerald-700"
-                  >
-                    905-548-8585
-                  </a>
-                </div>
-                <div className="min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 sm:col-span-2 lg:col-span-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Email
-                  </p>
-                  <a
-                    href="mailto:sales@rvvacations.com"
-                    className="mt-2 block break-words text-base font-semibold text-emerald-600 hover:text-emerald-700"
-                  >
-                    sales@rvvacations.com
-                  </a>
-                </div>
-              </div>
-            </div>
-          </section>
+          <ContactSection />
         </div>
       </div>
     </div>

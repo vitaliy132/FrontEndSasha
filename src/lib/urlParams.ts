@@ -1,3 +1,4 @@
+import { parseNonNegNumber } from './parse'
 import { VEHICLE_TYPES } from './vehicleTypes'
 import type { VehicleType } from '../types/rental'
 
@@ -29,13 +30,6 @@ function resolveVehicleModelKey(vehicleType: VehicleType, model: string): string
     return '35_36ft_slideout_bunks_2025'
   }
   return model
-}
-
-function parseNonNegNumber(raw: string | null): number | undefined {
-  if (raw === null || raw === '') return undefined
-  const n = Number(raw)
-  if (!Number.isFinite(n) || n < 0) return undefined
-  return n
 }
 
 export interface RentalPrefill {

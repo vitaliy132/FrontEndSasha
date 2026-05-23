@@ -1,5 +1,25 @@
 export type VehicleType = 'classA' | 'classB' | 'classC' | 'trailer'
 
+/** Trip form state for the rental calculator. */
+export interface RentalFormData {
+  startDate: string
+  endDate: string
+  vehicleType: VehicleType
+  vehicleModel: string
+  generatorType: 'none' | 'dailyUnlimited'
+  mileagePackage: string
+  mileagePerKm: string
+  kitchenKit: boolean
+  beddingKitPeople: string
+}
+
+export interface LeadFormData {
+  name: string
+  email: string
+  phone: string
+  address: string
+}
+
 export interface RentalVehicleModelOption {
   id: string
   label: string

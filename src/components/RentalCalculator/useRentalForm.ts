@@ -2,22 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { fetchRentalOptions } from '../../lib/api'
 import { readRentalQueryParams } from '../../lib/urlParams'
 import type {
+  RentalFormData,
   RentalOptionsResponse,
   RentalVehicleTypeOption,
   VehicleType,
 } from '../../types/rental'
 
-export interface RentalFormData {
-  startDate: string
-  endDate: string
-  vehicleType: VehicleType
-  vehicleModel: string
-  generatorType: 'none' | 'dailyUnlimited'
-  mileagePackage: string
-  mileagePerKm: string
-  kitchenKit: boolean
-  beddingKitPeople: string
-}
+export type { RentalFormData }
 
 const FALLBACK_MINIMUM_RENTAL_DAYS = 5
 

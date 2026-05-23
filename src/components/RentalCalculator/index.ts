@@ -9,5 +9,5 @@ export {
   radioLabelClasses,
   buttonClasses,
   errorClasses,
-} from './utils'
+} from './formStyles'
 export { VEHICLE_TYPES } from '../../lib/vehicleTypes'

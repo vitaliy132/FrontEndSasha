@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react'
-import { inputClasses, labelClasses, buttonClasses, errorClasses } from './index'
+import { buttonClasses, errorClasses, inputClasses, labelClasses } from './formStyles'
 import { Spinner } from './Spinner'
 
 export interface BookingLeadFormProps {
