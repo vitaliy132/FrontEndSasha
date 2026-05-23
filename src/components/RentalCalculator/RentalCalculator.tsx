@@ -299,32 +299,6 @@ export function RentalCalculator() {
                 <label className={checkboxLabelClasses}>
                   <input
                     type="checkbox"
-                    checked={formData.cancellationWaiver}
-                    onChange={(e) => updateField('cancellationWaiver', e.target.checked)}
-                    className={checkboxClasses}
-                    disabled={calculating}
-                  />
-                  <span className="text-sm font-medium text-slate-800">
-                    Cancellation waiver ($20/day, min $240)
-                  </span>
-                </label>
-
-                <label className={checkboxLabelClasses}>
-                  <input
-                    type="checkbox"
-                    checked={formData.windshieldCoverage}
-                    onChange={(e) => updateField('windshieldCoverage', e.target.checked)}
-                    className={checkboxClasses}
-                    disabled={calculating}
-                  />
-                  <span className="text-sm font-medium text-slate-800">
-                    Windshield coverage
-                  </span>
-                </label>
-
-                <label className={checkboxLabelClasses}>
-                  <input
-                    type="checkbox"
                     checked={formData.kitchenKit}
                     onChange={(e) => updateField('kitchenKit', e.target.checked)}
                     className={checkboxClasses}

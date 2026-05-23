@@ -12,8 +12,6 @@ export interface RentalFormData {
   endDate: string
   vehicleType: VehicleType
   vehicleModel: string
-  cancellationWaiver: boolean
-  windshieldCoverage: boolean
   generatorType: 'none' | 'dailyUnlimited'
   mileagePackage: string
   mileagePerKm: string
@@ -52,8 +50,6 @@ export function useRentalForm() {
     endDate: initial.endDate,
     vehicleType: initial.vehicleType,
     vehicleModel: initial.vehicleModel,
-    cancellationWaiver: initial.cancellationWaiver,
-    windshieldCoverage: initial.windshieldCoverage,
     generatorType: initial.generatorDailyUnlimited ? 'dailyUnlimited' : 'none',
     mileagePackage: '0',
     mileagePerKm: String(initial.extraKm || ''),

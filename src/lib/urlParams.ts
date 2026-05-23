@@ -44,8 +44,6 @@ export interface RentalPrefill {
   endDate: string
   vehicleType: VehicleType
   vehicleModel: string
-  cancellationWaiver: boolean
-  windshieldCoverage: boolean
   generatorDailyUnlimited: boolean
   kmPackages: number
   extraKm: number
@@ -73,14 +71,6 @@ export function readRentalQueryParams(search: string): RentalPrefill {
     vehicle,
     vehicleModelRaw?.trim() || '',
   )
-  const cancellationWaiver =
-    parseBool(
-      getParam(params, 'cancellationWaiver', 'cancellation_waiver'),
-    ) ?? false
-  const windshieldCoverage =
-    parseBool(
-      getParam(params, 'windshieldCoverage', 'windshield_coverage'),
-    ) ?? false
   const generatorDailyUnlimited =
     parseBool(
       getParam(
@@ -112,8 +102,6 @@ export function readRentalQueryParams(search: string): RentalPrefill {
     endDate: end,
     vehicleType: vehicle,
     vehicleModel,
-    cancellationWaiver,
-    windshieldCoverage,
     generatorDailyUnlimited,
     kmPackages,
     extraKm,

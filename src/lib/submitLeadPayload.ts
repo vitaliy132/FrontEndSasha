@@ -11,8 +11,6 @@ export interface RentalFormSnapshot {
   endDate: string
   vehicleType: VehicleType
   vehicleModel: string
-  cancellationWaiver: boolean
-  windshieldCoverage: boolean
   generatorType: 'none' | 'dailyUnlimited'
   mileagePackage: string
   mileagePerKm: string
@@ -65,8 +63,8 @@ export function buildSubmitLeadRequest(params: {
     vehicleModelLabel,
     startDate: rental.startDate,
     endDate: rental.endDate,
-    cancellationWaiver: rental.cancellationWaiver,
-    windshieldCoverage: rental.windshieldCoverage,
+    cancellationWaiver: false,
+    windshieldCoverage: false,
     generatorDailyUnlimited,
     kmPackages,
     extraKm,

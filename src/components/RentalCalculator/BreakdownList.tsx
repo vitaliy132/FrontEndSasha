@@ -15,8 +15,6 @@ const BREAKDOWN_LABELS: Record<string, string> = {
   kmPackages: 'Kilometer packages',
   hitch: 'Trailer Hitch',
   generator: 'Generator',
-  cancellationWaiver: 'Cancellation Waiver',
-  windshield: 'Windshield Coverage',
   kitchenKit: 'Kitchen Kit',
   beddingKit: 'Personal Kit',
   bikeRack: 'Bike Rack',
@@ -93,12 +91,6 @@ export function BreakdownList({ breakdown, totalFormatted }: { breakdown: Breakd
   if (breakdown_.extraKm > 0) {
     entries.push(['extraKm', formatCurrency(breakdown_.extraKm)])
   }
-
-  // Cancellation Waiver
-  entries.push(['cancellationWaiver', formatCurrency(breakdown_.cancellationWaiver)])
-
-  // Windshield Coverage
-  entries.push(['windshield', formatCurrency(breakdown_.windshield)])
 
   // Generator
   entries.push(['generator', formatCurrency(breakdown_.generator)])
