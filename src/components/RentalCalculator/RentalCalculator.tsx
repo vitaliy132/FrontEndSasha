@@ -1,5 +1,6 @@
 import { CalculatorHeader } from './CalculatorHeader'
 import { ContactSection } from './ContactSection'
+import { SeasonalRatesSection } from './SeasonalRatesSection'
 import { EstimatePanel } from './EstimatePanel'
 import { TripDetailsForm } from './TripDetailsForm'
 import { useLeadForm } from './useLeadForm'
@@ -62,6 +63,8 @@ export function RentalCalculator() {
 
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <CalculatorHeader />
+
+        <SeasonalRatesSection />
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
           <TripDetailsForm
