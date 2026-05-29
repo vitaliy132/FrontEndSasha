@@ -64,9 +64,9 @@ export function RentalCalculator() {
       <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <CalculatorHeader />
 
-        <SeasonalRatesSection />
-
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
+          <SeasonalRatesSection />
+
           <TripDetailsForm
             formData={formData}
             vehicleTypes={vehicleTypes}
